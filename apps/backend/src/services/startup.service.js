@@ -34,7 +34,7 @@ create = async (data) => {
   }
   // Optional: more validation via Zod or validator.helper
 
-  return prisma.testModel.create({ data });
+  return prisma.startup.create({ data });
 };
 
 update = async (id, data) => {
