@@ -1,37 +1,20 @@
 const exceptions = require('../exceptions');
 
 // eslint-disable-next-line max-statements
-const finalResponse = (req, res, message, data, code) => {
+const finalResponse = (req, res, message, data, code = 200) => {
+  const statusCode = Number.isInteger(code) ? code : 500; // fallback if code is invalid
+  const isSuccess = statusCode.toString().startsWith('2');
+
   const status = code.toString().startsWith('2');
   const responseData = {
     code,
     data,
     message,
-    status,
+    status: isSuccess,
   };
-  if (!status) responseData.requestData = req.body;
+  if (!isSuccess) responseData.requestData = req.body;
 
-  let text = `Response for ${req.originalUrl} | message: ${message}`;
-  if (req.EVENT_LOG) text = `${req.EVENT_LOG}|${message}`;
-  if (req.orderId) text += `|orderId=${req.orderId}`;
-  if (req.paymentReferenceId)
-    text += `|paymentReferenceId=${req.paymentReferenceId}`;
-  if (req.body?.merchantKey) text += `|merchantKey=${req.body.merchantKey}`;
-
-  // const logData = {
-  //   channel: req.channel,
-  //   code,
-  //   orderId: req.orderId,
-  //   paymentReferenceId: req.paymentReferenceId,
-  //   requestId: req.requestId,
-  //   requestMethod: req.method,
-  //   requestPath: req.path,
-  //   responseBody: responseData,
-  //   responseTime: new Date().toISOString(),
-  //   status,
-  // };
-
-  res.status(code);
+  res.status(statusCode);
   res.setHeader('Content-Type', `application/json`);
   res.setHeader('X-SW-Request-Id', req.requestId || 0);
   res.send(responseData);

@@ -1,6 +1,6 @@
 const { PrismaClient } = require('@workspace/database/backend-prisma-client');
 const prisma = new PrismaClient();
-const { ValidationErrors, NotFound } = require('../exceptions');
+const { ValidationErrors } = require('../exceptions');
 
 fetchAll = async () => {
   const result = await prisma.startup.findMany();
@@ -27,12 +27,9 @@ create = async (data) => {
 
   for (const field of required) {
     if (!data[field]) {
-      // throw new ValidationErrors(`${field} is required`);
-
       throw new ValidationErrors(null, `${field} is required`);
     }
   }
-  // Optional: more validation via Zod or validator.helper
 
   return prisma.startup.create({ data });
 };
@@ -45,7 +42,7 @@ update = async (id, data) => {
   } catch (err) {
     if (err.code === 'P2025') {
       // record not found
-      return null;
+      throw new ValidationErrors(null, `${id} record not found`);
     }
     throw err;
   }
@@ -57,7 +54,7 @@ remove = async (id) => {
     return result;
   } catch (err) {
     if (err.code === 'P2025') {
-      return null;
+      throw new ValidationErrors(null, `${id} record not found`);
     }
     throw err;
   }
