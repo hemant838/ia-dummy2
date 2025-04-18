@@ -12,7 +12,12 @@ const ACCESS_TOKEN_EXPIRY = '15m';
 const REFRESH_TOKEN_EXPIRY = '30d';
 
 function generateTokens(user) {
-  const payload = { userId: user.id, email: user.email, role: user.role };
+  const payload = {
+    userId: user.id,
+    email: user.email,
+    emailVerified: user.emailVerified || false,
+    role: user.role,
+  };
 
   const accessToken = jwt.sign(payload, JWT_SECRET, {
     expiresIn: ACCESS_TOKEN_EXPIRY,

@@ -42,7 +42,10 @@ logout = async (req, res, next) => {
 
 getProfile = async (req, res, next) => {
   try {
-    return response.success(req, res, req.user, 'User profile');
+    const user = { ...req.user };
+    delete user['password'];
+
+    return response.success(req, res, user, 'User profile');
   } catch (err) {
     return next(err);
   }

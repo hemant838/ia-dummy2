@@ -2,6 +2,7 @@ import * as React from 'react';
 import { type Metadata } from 'next';
 import Link from 'next/link';
 
+import { getJWTToken } from '@workspace/auth/jwtAccessToken';
 import { APP_NAME } from '@workspace/common/app';
 import { routes } from '@workspace/routes';
 import { Logo } from '@workspace/ui/components/logo';
@@ -18,6 +19,10 @@ export const metadata: Metadata = {
 
 export default async function OrganizationsPage(): Promise<React.JSX.Element> {
   const organizations = await getOrganizations();
+  const token = await getJWTToken();
+
+  console.log('here', token);
+
   return (
     <div className="relative min-h-screen bg-background">
       <div className="fixed inset-x-0 top-0 z-10 mx-auto flex min-w-80 items-center justify-center bg-background p-4">

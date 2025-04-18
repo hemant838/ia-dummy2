@@ -78,9 +78,15 @@ export function getSessionExpiryFromNow(): Date {
   return addSeconds(Date.now(), session.maxAge);
 }
 
+// export const session = {
+//   strategy: 'database',
+//   maxAge: 60 * 60 * 24 * 30, // 30 days
+//   updateAge: 24 * 60 * 60, // 24 hours
+//   generateSessionToken
+// } satisfies NextAuthConfig['session'];
+
 export const session = {
-  strategy: 'database',
+  strategy: 'jwt',
   maxAge: 60 * 60 * 24 * 30, // 30 days
-  updateAge: 24 * 60 * 60, // 24 hours
-  generateSessionToken
+  updateAge: 24 * 60 * 60 // 24 hours
 } satisfies NextAuthConfig['session'];

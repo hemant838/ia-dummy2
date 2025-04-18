@@ -14,7 +14,7 @@ import { session } from './session';
 export const authConfig = {
   adapter,
   providers,
-  secret: keys().AUTH_SECRET,
+  secret: keys().AUTH_SECRET || process.env.AUTH_SECRET,
   session,
   pages: {
     signIn: getPathname(routes.dashboard.auth.SignIn, baseUrl.Dashboard),

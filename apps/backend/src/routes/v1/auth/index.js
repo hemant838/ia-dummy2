@@ -8,12 +8,12 @@ router.post('/sign-in', authController.login);
 router.post('/sign-up', authController.register);
 router.post(
   '/logout',
-  middlewares.auth.authenticateUser,
+  middlewares.auth.authenticateAuthJWT,
   authController.logout,
 );
 router.get(
   '/user',
-  middlewares.auth.authenticateUser,
+  middlewares.auth.authenticateAuthJWT,
   authController.getProfile,
 );
 router.get('/refresh-token', authController.refresh);
