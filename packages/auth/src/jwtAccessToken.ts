@@ -2,6 +2,8 @@ import { cookies, headers } from 'next/headers';
 import jwt from 'jsonwebtoken';
 import { getToken } from 'next-auth/jwt';
 
+import { keys } from '../keys';
+
 export async function getRawJwtTokenFromCookie(): Promise<string | null> {
   const cookieStore = cookies();
 
@@ -19,7 +21,7 @@ export async function getJWTToken() {
     req: {
       headers: await headers()
     },
-    secret: process.env.AUTH_SECRET,
+    secret: keys().AUTH_SECRET,
     secureCookie: process.env.NODE_ENV === 'production'
   });
 
@@ -35,7 +37,7 @@ export async function getJWTToken() {
     {
       ...decoded
     },
-    process.env.AUTH_SECRET, // Shared secret for JWS
+    keys().AUTH_SECRET, // Shared secret for JWS
     { algorithm: 'HS256' } // Use HS256 for simplicity
   );
 
