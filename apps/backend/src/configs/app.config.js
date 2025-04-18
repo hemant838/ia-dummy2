@@ -6,9 +6,12 @@ const allowedOrigin = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(';').filter((origin) => origin)
   : [];
 
+const jwtSecret = process.env.JWT_SECRET;
+
 module.exports = {
   version,
   env,
   port,
   allowedOrigin,
+  jwtSecret,
 };

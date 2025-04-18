@@ -7,7 +7,7 @@ const ServiceUnavailable = require('./service-unavailable');
 const ValidationErrors = require('./validation-errors');
 const WebhookNotEnabled = require('./webhook-not-enabled');
 const ConfirmOrderTimeoutException = require('./confirm-order-timeout');
-const OrderPending = require('./order-pending');
+const Unauthorized = require('./unauthorized');
 
 module.exports = {
   BadRequest,
@@ -15,7 +15,7 @@ module.exports = {
   HasBeenProcessed,
   NotAccepted,
   NotFound,
-  OrderPending,
+  Unauthorized,
   PaymentPending,
   ServiceUnavailable,
   ValidationErrors,

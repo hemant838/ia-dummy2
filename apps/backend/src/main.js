@@ -5,6 +5,7 @@ const responseTime = require('response-time');
 const cors = require('cors');
 const compression = require('compression');
 const helmet = require('helmet');
+const cookieParser = require('cookie-parser');
 
 const appConfig = require('./configs/app.config');
 const helpers = require('./helpers');
@@ -33,6 +34,8 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: false, limit: '512mb' }));
 app.use(express.json({ limit: '50mb' }));
+app.use(cookieParser());
+
 app.use(
   responseTime((req, res, time) => {
     res.setHeader('X-Response-Time', `${time}ms`);
