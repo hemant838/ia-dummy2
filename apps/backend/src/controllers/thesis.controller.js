@@ -1,66 +1,92 @@
 const { thesisService } = require('../services');
 const { BadRequest, NotFound } = require('../exceptions');
-const { response, validateRequestBody } = require('../helpers');
+const { response, pagination } = require('../helpers');
 
-getAllTheses = async (req, res, next) => {
+const getAllTheses = async (req, res, next) => {
   try {
-    const data = await thesisService.fetchAll();
-    return response.success(req, res, data, 'ok');
+    const { page, pageSize, skip, take } = pagination.getPaginationParams(
+      req.query,
+    );
+    const { search } = req.query;
+
+    const { data, total } = await thesisService.fetchAll({
+      skip,
+      take,
+      search,
+    });
+
+    const paginatedResponse = pagination.getPaginatedResponse(
+      data,
+      total,
+      page,
+      pageSize,
+    );
+    return response.success(
+      req,
+      res,
+      paginatedResponse,
+      'Theses retrieved successfully',
+    );
   } catch (err) {
     return next(err);
   }
 };
 
-getThesisById = async (req, res, next) => {
+const getThesisById = async (req, res, next) => {
   try {
     const { id } = req.params;
-    if (!id) throw new BadRequest('ID is required');
+    if (!id) {
+      throw new BadRequest('Thesis ID is required');
+    }
 
-    const data = await thesisService.fetchById(id);
-    if (!data) throw new NotFound(`ID ${id} not found`);
-
-    return response.success(req, res, data, 'success', 201);
+    const thesis = await thesisService.fetchById(id);
+    return response.success(req, res, thesis, 'Thesis retrieved successfully');
   } catch (err) {
     return next(err);
   }
 };
 
-createThesis = async (req, res, next) => {
+const createThesis = async (req, res, next) => {
   try {
     const payload = req.body;
-    // validateRequestBody('schemaName', payload);
-
-    const data = await thesisService.create(payload);
-    return response.success(req, res, data, 'created', 201);
+    const newThesis = await thesisService.create(payload);
+    return response.success(
+      req,
+      res,
+      newThesis,
+      'Thesis created successfully',
+      201,
+    );
   } catch (err) {
     return next(err);
   }
 };
 
-updateThesis = async (req, res, next) => {
+const updateThesis = async (req, res, next) => {
   try {
     const { id } = req.params;
     const payload = req.body;
 
-    if (!id) throw new BadRequest('ID is required');
-    const data = await thesisService.update(id, payload);
-    if (!data) throw new NotFound(`ID ${id} not found`);
+    if (!id) {
+      throw new BadRequest('Thesis ID is required');
+    }
 
-    return response.success(req, res, data, 'updated', 201);
+    const updated = await thesisService.update(id, payload);
+    return response.success(req, res, updated, 'Thesis updated successfully');
   } catch (err) {
     return next(err);
   }
 };
 
-deleteThesis = async (req, res, next) => {
+const deleteThesis = async (req, res, next) => {
   try {
     const { id } = req.params;
-    if (!id) throw new BadRequest('ID is required');
+    if (!id) {
+      throw new BadRequest('Thesis ID is required');
+    }
 
-    const data = await thesisService.remove(id);
-    if (!data) throw new NotFound(`ID ${id} not found`);
-
-    return response.success(req, res, data, 'deleted', 201);
+    const deleted = await thesisService.remove(id);
+    return response.success(req, res, deleted, 'Thesis deleted successfully');
   } catch (err) {
     return next(err);
   }

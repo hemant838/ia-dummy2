@@ -1,69 +1,98 @@
 const { startupService } = require('../services');
 const { BadRequest, NotFound } = require('../exceptions');
-const { response, validateRequestBody } = require('../helpers');
+const { response, pagination } = require('../helpers');
 
-getAllStartups = async (req, res, next) => {
+const getAllStartups = async (req, res, next) => {
   try {
-    const startups = await startupService.fetchAll();
+    const { page, pageSize, skip, take } = pagination.getPaginationParams(
+      req.query,
+    );
+    const { stage, search } = req.query;
 
-    return response.success(req, res, startups, 'ok');
+    const { data, total } = await startupService.fetchAll({
+      skip,
+      take,
+      stage,
+      search,
+    });
+
+    const paginatedResponse = pagination.getPaginatedResponse(
+      data,
+      total,
+      page,
+      pageSize,
+    );
+    return response.success(
+      req,
+      res,
+      paginatedResponse,
+      'Startups retrieved successfully',
+    );
   } catch (err) {
     return next(err);
   }
 };
 
-getStartupById = async (req, res, next) => {
+const getStartupById = async (req, res, next) => {
   try {
     const { id } = req.params;
-    if (!id) throw new BadRequest('ID is required');
+    if (!id) {
+      throw new BadRequest('Startup ID is required');
+    }
+
     const startup = await startupService.fetchById(id);
-    if (!startup) throw new NotFound(`ID ${id} not found`);
-
-    return response.success(req, res, startup, 'success', 201);
+    return response.success(
+      req,
+      res,
+      startup,
+      'Startup retrieved successfully',
+    );
   } catch (err) {
     return next(err);
   }
 };
 
-createStartup = async (req, res, next) => {
+const createStartup = async (req, res, next) => {
   try {
     const payload = req.body;
-
-    // validateRequestBody('schemaName', payload);
-
     const newStartup = await startupService.create(payload);
-
-    return response.success(req, res, newStartup, 'success', 201);
+    return response.success(
+      req,
+      res,
+      newStartup,
+      'Startup created successfully',
+      201,
+    );
   } catch (err) {
     return next(err);
   }
 };
 
-updateStartup = async (req, res, next) => {
+const updateStartup = async (req, res, next) => {
   try {
     const { id } = req.params;
     const payload = req.body;
 
-    // validateRequestBody('schemaName', payload);
+    if (!id) {
+      throw new BadRequest('Startup ID is required');
+    }
 
-    if (!id) throw new BadRequest('ID is required');
     const updated = await startupService.update(id, payload);
-    if (!updated) throw new NotFound(`ID ${id} not found`);
-
-    return response.success(req, res, updated, 'success', 201);
+    return response.success(req, res, updated, 'Startup updated successfully');
   } catch (err) {
     return next(err);
   }
 };
 
-deleteStartup = async (req, res, next) => {
+const deleteStartup = async (req, res, next) => {
   try {
     const { id } = req.params;
-    if (!id) throw new BadRequest('ID is required');
-    const deleted = await startupService.remove(id);
-    if (!deleted) throw new NotFound(`ID ${id} not found`);
+    if (!id) {
+      throw new BadRequest('Startup ID is required');
+    }
 
-    return response.success(req, res, deleted, 'success', 201);
+    const deleted = await startupService.remove(id);
+    return response.success(req, res, deleted, 'Startup deleted successfully');
   } catch (err) {
     return next(err);
   }

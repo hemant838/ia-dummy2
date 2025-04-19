@@ -1,62 +1,235 @@
 const { PrismaClient } = require('@workspace/database/backend-prisma-client');
 const prisma = new PrismaClient();
-const { ValidationErrors } = require('../exceptions');
+const { ValidationErrors, NotFound } = require('../exceptions');
 
-fetchAll = async () => {
-  const result = await prisma.startup.findMany();
-
-  return result;
-};
-
-fetchById = async (id) => {
-  return prisma.startup.findUnique({ where: { id } });
-};
-
-create = async (data) => {
-  // Example validation: ensure required fields
-  const required = [
-    'organizationId',
-    'thesisId',
-    'verticalPartnerId',
-    'name',
-    'legalName',
-    'foundedDate',
-    'stage',
-    'location',
-  ];
-
-  for (const field of required) {
-    if (!data[field]) {
-      throw new ValidationErrors(null, `${field} is required`);
-    }
-  }
-
-  return prisma.startup.create({ data });
-};
-
-update = async (id, data) => {
-  // Prevent updating id
-  delete data.id;
+const fetchAll = async ({ skip, take, stage, search }) => {
   try {
-    return prisma.startup.update({ where: { id }, data });
-  } catch (err) {
-    if (err.code === 'P2025') {
-      // record not found
-      throw new ValidationErrors(null, `${id} record not found`);
+    const where = {};
+
+    if (stage) {
+      where.stage = stage;
     }
-    throw err;
+
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    const [startups, total] = await Promise.all([
+      prisma.startup.findMany({
+        where,
+        skip,
+        take,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          founders: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          thesis: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      }),
+      prisma.startup.count({ where }),
+    ]);
+
+    return { data: startups, total };
+  } catch (error) {
+    throw new Error(`Error fetching startups: ${error.message}`);
   }
 };
 
-remove = async (id) => {
+const fetchById = async (id) => {
   try {
-    const result = await prisma.startup.delete({ where: { id } });
-    return result;
-  } catch (err) {
-    if (err.code === 'P2025') {
-      throw new ValidationErrors(null, `${id} record not found`);
+    const startup = await prisma.startup.findUnique({
+      where: { id },
+      include: {
+        founders: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        thesis: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        documents: true,
+      },
+    });
+
+    if (!startup) {
+      throw new NotFound(`Startup with ID ${id} not found`);
     }
-    throw err;
+
+    return startup;
+  } catch (error) {
+    if (error instanceof NotFound) {
+      throw error;
+    }
+    throw new Error(`Error fetching startup: ${error.message}`);
+  }
+};
+
+const create = async (data) => {
+  try {
+    // Validate required fields
+    const required = [
+      'organizationId',
+      'thesisId',
+      'verticalPartnerId',
+      'name',
+      'legalName',
+      'foundedDate',
+      'stage',
+      'location',
+    ];
+
+    const missingFields = required.filter((field) => !data[field]);
+    if (missingFields.length > 0) {
+      throw new ValidationErrors(
+        null,
+        `Missing required fields: ${missingFields.join(', ')}`,
+      );
+    }
+
+    // Validate relationships exist
+    const [organization, thesis, verticalPartner] = await Promise.all([
+      prisma.organization.findUnique({ where: { id: data.organizationId } }),
+      prisma.thesis.findUnique({ where: { id: data.thesisId } }),
+      prisma.user.findUnique({ where: { id: data.verticalPartnerId } }),
+    ]);
+
+    if (!organization) {
+      throw new ValidationErrors(
+        null,
+        `Organization with ID ${data.organizationId} not found`,
+      );
+    }
+    if (!thesis) {
+      throw new ValidationErrors(
+        null,
+        `Thesis with ID ${data.thesisId} not found`,
+      );
+    }
+    if (!verticalPartner) {
+      throw new ValidationErrors(
+        null,
+        `Vertical Partner with ID ${data.verticalPartnerId} not found`,
+      );
+    }
+
+    return prisma.startup.create({
+      data,
+      include: {
+        founders: true,
+        thesis: true,
+      },
+    });
+  } catch (error) {
+    if (error instanceof ValidationErrors) {
+      throw error;
+    }
+    throw new Error(`Error creating startup: ${error.message}`);
+  }
+};
+
+const update = async (id, data) => {
+  try {
+    // Prevent updating id
+    delete data.id;
+
+    // Check if startup exists
+    const exists = await prisma.startup.findUnique({ where: { id } });
+    if (!exists) {
+      throw new NotFound(`Startup with ID ${id} not found`);
+    }
+
+    // Validate relationships if they're being updated
+    if (data.organizationId) {
+      const organization = await prisma.organization.findUnique({
+        where: { id: data.organizationId },
+      });
+      if (!organization) {
+        throw new ValidationErrors(
+          null,
+          `Organization with ID ${data.organizationId} not found`,
+        );
+      }
+    }
+
+    if (data.thesisId) {
+      const thesis = await prisma.thesis.findUnique({
+        where: { id: data.thesisId },
+      });
+      if (!thesis) {
+        throw new ValidationErrors(
+          null,
+          `Thesis with ID ${data.thesisId} not found`,
+        );
+      }
+    }
+
+    if (data.verticalPartnerId) {
+      const verticalPartner = await prisma.user.findUnique({
+        where: { id: data.verticalPartnerId },
+      });
+      if (!verticalPartner) {
+        throw new ValidationErrors(
+          null,
+          `Vertical Partner with ID ${data.verticalPartnerId} not found`,
+        );
+      }
+    }
+
+    return prisma.startup.update({
+      where: { id },
+      data,
+      include: {
+        founders: true,
+        thesis: true,
+      },
+    });
+  } catch (error) {
+    if (error instanceof NotFound || error instanceof ValidationErrors) {
+      throw error;
+    }
+    throw new Error(`Error updating startup: ${error.message}`);
+  }
+};
+
+const remove = async (id) => {
+  try {
+    // Check if startup exists
+    const exists = await prisma.startup.findUnique({ where: { id } });
+    if (!exists) {
+      throw new NotFound(`Startup with ID ${id} not found`);
+    }
+
+    return prisma.startup.delete({
+      where: { id },
+      include: {
+        founders: true,
+        thesis: true,
+      },
+    });
+  } catch (error) {
+    if (error instanceof NotFound) {
+      throw error;
+    }
+    throw new Error(`Error deleting startup: ${error.message}`);
   }
 };
 

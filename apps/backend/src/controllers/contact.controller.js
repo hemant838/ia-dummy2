@@ -1,70 +1,99 @@
 const { contactService } = require('../services');
 const { BadRequest, NotFound } = require('../exceptions');
-const { response, validateRequestBody } = require('../helpers');
+const { response, pagination } = require('../helpers');
 
-getAllContacts = async (req, res, next) => {
+const getAllContacts = async (req, res, next) => {
   try {
-    const result = await contactService.fetchAll();
+    const { page, pageSize, skip, take } = pagination.getPaginationParams(
+      req.query,
+    );
+    const { record, stage, search } = req.query;
 
-    return response.success(req, res, result, 'success', 200);
+    const { data, total } = await contactService.fetchAll({
+      skip,
+      take,
+      record,
+      stage,
+      search,
+    });
+
+    const paginatedResponse = pagination.getPaginatedResponse(
+      data,
+      total,
+      page,
+      pageSize,
+    );
+    return response.success(
+      req,
+      res,
+      paginatedResponse,
+      'Contacts retrieved successfully',
+    );
   } catch (err) {
     return next(err);
   }
 };
 
-getContactById = async (req, res, next) => {
+const getContactById = async (req, res, next) => {
   try {
     const { id } = req.params;
-    if (!id) throw new BadRequest('ID is required');
-    const result = await contactService.fetchById(id);
-    if (!result) throw new NotFound(`ID ${id} not found`);
+    if (!id) {
+      throw new BadRequest('Contact ID is required');
+    }
 
-    return response.success(req, res, result, 'success', 201);
+    const contact = await contactService.fetchById(id);
+    return response.success(
+      req,
+      res,
+      contact,
+      'Contact retrieved successfully',
+    );
   } catch (err) {
     return next(err);
   }
 };
 
-createContact = async (req, res, next) => {
+const createContact = async (req, res, next) => {
   try {
     const payload = req.body;
-
-    // validateRequestBody('schemaName', payload);
-
-    const result = await contactService.create(payload);
-
-    return response.success(req, res, result, 'success', 201);
+    const newContact = await contactService.create(payload);
+    return response.success(
+      req,
+      res,
+      newContact,
+      'Contact created successfully',
+      201,
+    );
   } catch (err) {
     return next(err);
   }
 };
 
-updateContact = async (req, res, next) => {
+const updateContact = async (req, res, next) => {
   try {
     const { id } = req.params;
     const payload = req.body;
 
-    // validateRequestBody('schemaName', payload);
+    if (!id) {
+      throw new BadRequest('Contact ID is required');
+    }
 
-    if (!id) throw new BadRequest('ID is required');
-    const result = await contactService.update(id, payload);
-    if (!result) throw new NotFound(`ID ${id} not found`);
-
-    return response.success(req, res, result, 'success', 201);
+    const updated = await contactService.update(id, payload);
+    return response.success(req, res, updated, 'Contact updated successfully');
   } catch (err) {
     return next(err);
   }
 };
 
-deleteContact = async (req, res, next) => {
+const deleteContact = async (req, res, next) => {
   try {
     const { id } = req.params;
+    if (!id) {
+      throw new BadRequest('Contact ID is required');
+    }
 
-    if (!id) throw new BadRequest('ID is required');
     const deleted = await contactService.remove(id);
-    if (!deleted) throw new NotFound(`ID ${id} not found`);
-
-    return response.success(req, res, deleted, 'success', 201);
+    return response.success(req, res, deleted, 'Contact deleted successfully');
   } catch (err) {
     return next(err);
   }

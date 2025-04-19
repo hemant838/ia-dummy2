@@ -13,18 +13,36 @@ export const getApiDocs = async () => {
         description:
           'Click "Authorize", enter your API key, then select "Organization" to get started with the API.'
       },
+      servers: [
+        {
+          url: 'http://localhost:3005/v1/api',
+          description: 'Local development backend server'
+        }
+      ],
       components: {
+        // securitySchemes: {
+        //   ApiKeyAuth: {
+        //     type: 'apiKey',
+        //     in: 'header',
+        //     name: 'X-API-Key'
+        //   }
+        // }
         securitySchemes: {
-          ApiKeyAuth: {
-            type: 'apiKey',
-            in: 'header',
-            name: 'X-API-Key'
+          BearerAuth: {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT'
           }
         }
       },
+      // security: [
+      //   {
+      //     ApiKeyAuth: []
+      //   }
+      // ]
       security: [
         {
-          ApiKeyAuth: []
+          BearerAuth: []
         }
       ]
     }
