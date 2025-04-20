@@ -1,15 +1,13 @@
-import { prisma } from '@workspace/database/client';
-
 import { withAuth } from '~/lib/with-auth';
 
 /**
  * @swagger
- * /organization:
+ * /program:
  *   get:
- *     summary: Get all organizations
- *     description: Returns a paginated list of organizations with optional search
+ *     summary: Get all programs
+ *     description: Returns a paginated list of programs with optional search
  *     tags:
- *       - Organization
+ *       - Program
  *     parameters:
  *       - in: query
  *         name: page
@@ -30,10 +28,10 @@ import { withAuth } from '~/lib/with-auth';
  *         name: search
  *         schema:
  *           type: string
- *         description: Search organizations by name, email, or phone
+ *         description: Search programs by name, description, or program type
  *     responses:
  *       200:
- *         description: List of organizations retrieved successfully
+ *         description: List of programs retrieved successfully
  *         content:
  *           application/json:
  *             schema:
@@ -47,35 +45,35 @@ import { withAuth } from '~/lib/with-auth';
  *                       id:
  *                         type: string
  *                         format: uuid
- *                       stripeCustomerId:
+ *                       organizationId:
  *                         type: string
+ *                         format: uuid
  *                       name:
  *                         type: string
- *                       address:
+ *                       description:
  *                         type: string
- *                       phone:
+ *                       startDate:
  *                         type: string
- *                       email:
+ *                         format: date-time
+ *                       endDate:
  *                         type: string
- *                       website:
+ *                         format: date-time
+ *                       capacity:
+ *                         type: integer
+ *                       applicationDeadline:
  *                         type: string
- *                       linkedInProfile:
+ *                         format: date-time
+ *                       programType:
  *                         type: string
- *                       instagramProfile:
- *                         type: string
- *                       youTubeChannel:
- *                         type: string
- *                       xProfile:
- *                         type: string
- *                       tikTokProfile:
- *                         type: string
- *                       facebookPage:
- *                         type: string
- *                       completedOnboarding:
- *                         type: boolean
- *                       billingPlan:
- *                         type: string
- *                       users:
+ *                       organization:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                             format: uuid
+ *                           name:
+ *                             type: string
+ *                       startups:
  *                         type: array
  *                         items:
  *                           type: object
@@ -85,9 +83,7 @@ import { withAuth } from '~/lib/with-auth';
  *                               format: uuid
  *                             name:
  *                               type: string
- *                             email:
- *                               type: string
- *                             role:
+ *                             stage:
  *                               type: string
  *                       createdAt:
  *                         type: string
@@ -117,10 +113,10 @@ import { withAuth } from '~/lib/with-auth';
  *         description: Internal server error
  *
  *   post:
- *     summary: Create a new organization
- *     description: Create a new organization with the provided details
+ *     summary: Create a new program
+ *     description: Create a new program with the provided details
  *     tags:
- *       - Organization
+ *       - Program
  *     requestBody:
  *       required: true
  *       content:
@@ -128,51 +124,47 @@ import { withAuth } from '~/lib/with-auth';
  *           schema:
  *             type: object
  *             required:
+ *               - organizationId
  *               - name
- *               - stripeCustomerId
+ *               - description
+ *               - startDate
+ *               - endDate
+ *               - programType
  *             properties:
+ *               organizationId:
+ *                 type: string
+ *                 format: uuid
  *               name:
  *                 type: string
- *               stripeCustomerId:
+ *               description:
  *                 type: string
- *               address:
+ *               startDate:
  *                 type: string
- *               phone:
+ *                 format: date-time
+ *               endDate:
  *                 type: string
- *               email:
+ *                 format: date-time
+ *               capacity:
+ *                 type: integer
+ *               applicationDeadline:
  *                 type: string
- *               website:
- *                 type: string
- *               linkedInProfile:
- *                 type: string
- *               instagramProfile:
- *                 type: string
- *               youTubeChannel:
- *                 type: string
- *               xProfile:
- *                 type: string
- *               tikTokProfile:
- *                 type: string
- *               facebookPage:
- *                 type: string
- *               completedOnboarding:
- *                 type: boolean
- *               billingPlan:
+ *                 format: date-time
+ *               programType:
  *                 type: string
  *     responses:
  *       201:
- *         description: Organization created successfully
+ *         description: Program created successfully
  *       422:
  *         description: Validation error
  *       500:
  *         description: Internal server error
  *
- * /organization/{id}:
+ * /program/{id}:
  *   get:
- *     summary: Get organization by ID
- *     description: Returns detailed information about a specific organization
+ *     summary: Get program by ID
+ *     description: Returns detailed information about a specific program
  *     tags:
- *       - Organization
+ *       - Program
  *     parameters:
  *       - in: path
  *         name: id
@@ -180,10 +172,10 @@ import { withAuth } from '~/lib/with-auth';
  *         schema:
  *           type: string
  *           format: uuid
- *         description: Organization ID
+ *         description: Program ID
  *     responses:
  *       200:
- *         description: Organization details retrieved successfully
+ *         description: Program details retrieved successfully
  *         content:
  *           application/json:
  *             schema:
@@ -195,48 +187,34 @@ import { withAuth } from '~/lib/with-auth';
  *                     id:
  *                       type: string
  *                       format: uuid
- *                     stripeCustomerId:
+ *                     organizationId:
  *                       type: string
+ *                       format: uuid
  *                     name:
  *                       type: string
- *                     address:
+ *                     description:
  *                       type: string
- *                     phone:
+ *                     startDate:
  *                       type: string
- *                     email:
+ *                       format: date-time
+ *                     endDate:
  *                       type: string
- *                     website:
+ *                       format: date-time
+ *                     capacity:
+ *                       type: integer
+ *                     applicationDeadline:
  *                       type: string
- *                     linkedInProfile:
+ *                       format: date-time
+ *                     programType:
  *                       type: string
- *                     instagramProfile:
- *                       type: string
- *                     youTubeChannel:
- *                       type: string
- *                     xProfile:
- *                       type: string
- *                     tikTokProfile:
- *                       type: string
- *                     facebookPage:
- *                       type: string
- *                     completedOnboarding:
- *                       type: boolean
- *                     billingPlan:
- *                       type: string
- *                     users:
- *                       type: array
- *                       items:
- *                         type: object
- *                         properties:
- *                           id:
- *                             type: string
- *                             format: uuid
- *                           name:
- *                             type: string
- *                           email:
- *                             type: string
- *                           role:
- *                             type: string
+ *                     organization:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                           format: uuid
+ *                         name:
+ *                           type: string
  *                     startups:
  *                       type: array
  *                       items:
@@ -256,7 +234,7 @@ import { withAuth } from '~/lib/with-auth';
  *                             format: date-time
  *                           location:
  *                             type: string
- *                     programs:
+ *                     events:
  *                       type: array
  *                       items:
  *                         type: object
@@ -266,13 +244,21 @@ import { withAuth } from '~/lib/with-auth';
  *                             format: uuid
  *                           name:
  *                             type: string
- *                           startDate:
+ *                           description:
+ *                             type: string
+ *                           date:
  *                             type: string
  *                             format: date-time
  *                           endDate:
  *                             type: string
  *                             format: date-time
- *                           programType:
+ *                           location:
+ *                             type: string
+ *                           virtualLink:
+ *                             type: string
+ *                           capacity:
+ *                             type: integer
+ *                           eventType:
  *                             type: string
  *                     createdAt:
  *                       type: string
@@ -281,15 +267,15 @@ import { withAuth } from '~/lib/with-auth';
  *                       type: string
  *                       format: date-time
  *       404:
- *         description: Organization not found
+ *         description: Program not found
  *       500:
  *         description: Internal server error
  *
  *   put:
- *     summary: Update organization
- *     description: Update an existing organization with the provided details
+ *     summary: Update program
+ *     description: Update an existing program with the provided details
  *     tags:
- *       - Organization
+ *       - Program
  *     parameters:
  *       - in: path
  *         name: id
@@ -297,7 +283,7 @@ import { withAuth } from '~/lib/with-auth';
  *         schema:
  *           type: string
  *           format: uuid
- *         description: Organization ID
+ *         description: Program ID
  *     requestBody:
  *       required: true
  *       content:
@@ -305,49 +291,41 @@ import { withAuth } from '~/lib/with-auth';
  *           schema:
  *             type: object
  *             properties:
+ *               organizationId:
+ *                 type: string
+ *                 format: uuid
  *               name:
  *                 type: string
- *               stripeCustomerId:
+ *               description:
  *                 type: string
- *               address:
+ *               startDate:
  *                 type: string
- *               phone:
+ *                 format: date-time
+ *               endDate:
  *                 type: string
- *               email:
+ *                 format: date-time
+ *               capacity:
+ *                 type: integer
+ *               applicationDeadline:
  *                 type: string
- *               website:
- *                 type: string
- *               linkedInProfile:
- *                 type: string
- *               instagramProfile:
- *                 type: string
- *               youTubeChannel:
- *                 type: string
- *               xProfile:
- *                 type: string
- *               tikTokProfile:
- *                 type: string
- *               facebookPage:
- *                 type: string
- *               completedOnboarding:
- *                 type: boolean
- *               billingPlan:
+ *                 format: date-time
+ *               programType:
  *                 type: string
  *     responses:
  *       200:
- *         description: Organization updated successfully
+ *         description: Program updated successfully
  *       404:
- *         description: Organization not found
+ *         description: Program not found
  *       422:
  *         description: Validation error
  *       500:
  *         description: Internal server error
  *
  *   delete:
- *     summary: Delete organization
- *     description: Delete an existing organization
+ *     summary: Delete program
+ *     description: Delete an existing program
  *     tags:
- *       - Organization
+ *       - Program
  *     parameters:
  *       - in: path
  *         name: id
@@ -355,14 +333,14 @@ import { withAuth } from '~/lib/with-auth';
  *         schema:
  *           type: string
  *           format: uuid
- *         description: Organization ID
+ *         description: Program ID
  *     responses:
  *       200:
- *         description: Organization deleted successfully
+ *         description: Program deleted successfully
  *       404:
- *         description: Organization not found
+ *         description: Program not found
  *       422:
- *         description: Cannot delete organization with associated users or startups
+ *         description: Cannot delete program with associated startups or events
  *       500:
  *         description: Internal server error
  */
@@ -376,4 +354,4 @@ export const GET = withAuth(async function (req, ctx) {
       'Content-Type': 'application/json'
     }
   });
-});
+}); 

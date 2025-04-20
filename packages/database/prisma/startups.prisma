@@ -399,6 +399,8 @@ model Organization {
   webhooks            Webhook[]
   startups            Startup[]
   programs            Program[]
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
 
   @@index([stripeCustomerId], map: "IX_Organization_stripeCustomerId")
 }
