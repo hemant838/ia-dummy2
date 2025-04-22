@@ -655,7 +655,8 @@ model StartupDocument {
   startupApplicationId String?             @db.Uuid
   documentType         DocumentType
   fileUrl              String              @db.VarChar(2048)
-  uploadedAt           DateTime            @default(now())
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
   startup              Startup             @relation(fields: [startupId], references: [id])
   startupApplication   StartupApplication? @relation(fields: [startupApplicationId], references: [id])
 

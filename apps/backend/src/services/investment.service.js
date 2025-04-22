@@ -2,50 +2,41 @@ const { PrismaClient } = require('@workspace/database/backend-prisma-client');
 const prisma = new PrismaClient();
 const { ValidationErrors, NotFound } = require('../exceptions');
 
-const fetchAll = async ({
-  skip,
-  take,
-  mentorId,
-  startupId,
-  active,
-  search,
-}) => {
+const fetchAll = async ({ skip, take, investorId, startupId, type, search }) => {
   try {
     const where = {};
 
-    if (mentorId) {
-      where.mentorId = mentorId;
+    if (investorId) {
+      where.investorId = investorId;
     }
 
     if (startupId) {
       where.startupId = startupId;
     }
 
-    if (active) {
-      where.OR = [{ endDate: null }, { endDate: { gt: new Date() } }];
+    if (type) {
+      where.type = type;
     }
 
     if (search) {
       where.OR = [
-        { focusAreas: { has: search } },
-        { meetingCadence: { contains: search, mode: 'insensitive' } },
         { notes: { contains: search, mode: 'insensitive' } },
       ];
     }
 
-    const [mentorships, total] = await Promise.all([
-      prisma.mentorship.findMany({
+    const [investments, total] = await Promise.all([
+      prisma.investment.findMany({
         where,
         skip,
         take,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { date: 'desc' },
         include: {
-          mentor: {
+          investor: {
             select: {
               id: true,
               name: true,
               email: true,
-              expertise: true,
+              investorProfile: true,
             },
           },
           startup: {
@@ -57,27 +48,26 @@ const fetchAll = async ({
           },
         },
       }),
-      prisma.mentorship.count({ where }),
+      prisma.investment.count({ where }),
     ]);
 
-    return { data: mentorships, total };
+    return { data: investments, total };
   } catch (error) {
-    throw new Error(`Error fetching mentorships: ${error.message}`);
+    throw new Error(`Error fetching investments: ${error.message}`);
   }
 };
 
 const fetchById = async (id) => {
   try {
-    const mentorship = await prisma.mentorship.findUnique({
+    const investment = await prisma.investment.findUnique({
       where: { id },
       include: {
-        mentor: {
+        investor: {
           select: {
             id: true,
             name: true,
             email: true,
-            expertise: true,
-            mentorProfile: true,
+            investorProfile: true,
           },
         },
         startup: {
@@ -86,35 +76,28 @@ const fetchById = async (id) => {
             name: true,
             stage: true,
             description: true,
-            founders: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-              },
-            },
           },
         },
       },
     });
 
-    if (!mentorship) {
-      throw new NotFound(`Mentorship with ID ${id} not found`);
+    if (!investment) {
+      throw new NotFound(`Investment with ID ${id} not found`);
     }
 
-    return mentorship;
+    return investment;
   } catch (error) {
     if (error instanceof NotFound) {
       throw error;
     }
-    throw new Error(`Error fetching mentorship: ${error.message}`);
+    throw new Error(`Error fetching investment: ${error.message}`);
   }
 };
 
 const create = async (data) => {
   try {
     // Validate required fields
-    const required = ['mentorId', 'startupId', 'startDate', 'focusAreas'];
+    const required = ['investorId', 'startupId', 'amount', 'type', 'date'];
 
     const missingFields = required.filter((field) => !data[field]);
     if (missingFields.length > 0) {
@@ -125,27 +108,24 @@ const create = async (data) => {
     }
 
     // Validate relationships exist
-    const [mentor, startup] = await Promise.all([
+    const [investor, startup] = await Promise.all([
       prisma.user.findUnique({
-        where: { id: data.mentorId },
-        include: { mentorProfile: true },
+        where: { id: data.investorId },
+        include: { investorProfile: true },
       }),
       prisma.startup.findUnique({ where: { id: data.startupId } }),
     ]);
 
-    if (!mentor) {
+    if (!investor) {
       throw new ValidationErrors(
         null,
-        `Mentor with ID ${data.mentorId} not found`,
+        `Investor with ID ${data.investorId} not found`,
       );
     }
-
-    // ####### UNCOMMENT BELOW CONDITION WHEN NEEDED #######
-
-    if (!mentor.mentorProfile) {
+    if (!investor.investorProfile) {
       throw new ValidationErrors(
         null,
-        `No mentor profile found for User ${data.mentorId}`,
+        `User ${data.investorId} is not an investor`,
       );
     }
     if (!startup) {
@@ -155,30 +135,23 @@ const create = async (data) => {
       );
     }
 
-    // Check if mentorship already exists
-    const existing = await prisma.mentorship.findFirst({
-      where: {
-        mentorId: data.mentorId,
-        startupId: data.startupId,
-      },
-    });
-
-    if (existing) {
+    // Validate numeric fields
+    if (data.equityPercentage && (data.equityPercentage < 0 || data.equityPercentage > 100)) {
       throw new ValidationErrors(
         null,
-        `Mentorship between mentor ${data.mentorId} and startup ${data.startupId} already exists`,
+        'Equity percentage must be between 0 and 100',
       );
     }
 
-    return prisma.mentorship.create({
+    return prisma.investment.create({
       data,
       include: {
-        mentor: {
+        investor: {
           select: {
             id: true,
             name: true,
             email: true,
-            expertise: true,
+            investorProfile: true,
           },
         },
         startup: {
@@ -194,55 +167,41 @@ const create = async (data) => {
     if (error instanceof ValidationErrors) {
       throw error;
     }
-    throw new Error(`Error creating mentorship: ${error.message}`);
+    throw new Error(`Error creating investment: ${error.message}`);
   }
 };
 
 const update = async (id, data) => {
   try {
-    // Prevent updating id, mentorId, and startupId
+    // Prevent updating id, investorId, and startupId
     delete data.id;
-    delete data.mentorId;
+    delete data.investorId;
     delete data.startupId;
 
-    // Check if mentorship exists
-    const exists = await prisma.mentorship.findUnique({ where: { id } });
+    // Check if investment exists
+    const exists = await prisma.investment.findUnique({ where: { id } });
     if (!exists) {
-      throw new NotFound(`Mentorship with ID ${id} not found`);
+      throw new NotFound(`Investment with ID ${id} not found`);
     }
 
-    // Validate dates if being updated
-    if (data.startDate && exists.endDate) {
-      const startDate = new Date(data.startDate);
-      const endDate = new Date(exists.endDate);
-      if (startDate > endDate) {
-        throw new ValidationErrors(
-          null,
-          'Start date cannot be later than end date',
-        );
-      }
-    }
-    if (data.endDate) {
-      const startDate = new Date(data.startDate || exists.startDate);
-      const endDate = new Date(data.endDate);
-      if (startDate > endDate) {
-        throw new ValidationErrors(
-          null,
-          'End date cannot be earlier than start date',
-        );
-      }
+    // Validate numeric fields
+    if (data.equityPercentage && (data.equityPercentage < 0 || data.equityPercentage > 100)) {
+      throw new ValidationErrors(
+        null,
+        'Equity percentage must be between 0 and 100',
+      );
     }
 
-    return prisma.mentorship.update({
+    return prisma.investment.update({
       where: { id },
       data,
       include: {
-        mentor: {
+        investor: {
           select: {
             id: true,
             name: true,
             email: true,
-            expertise: true,
+            investorProfile: true,
           },
         },
         startup: {
@@ -258,27 +217,27 @@ const update = async (id, data) => {
     if (error instanceof NotFound || error instanceof ValidationErrors) {
       throw error;
     }
-    throw new Error(`Error updating mentorship: ${error.message}`);
+    throw new Error(`Error updating investment: ${error.message}`);
   }
 };
 
 const remove = async (id) => {
   try {
-    // Check if mentorship exists
-    const exists = await prisma.mentorship.findUnique({ where: { id } });
+    // Check if investment exists
+    const exists = await prisma.investment.findUnique({ where: { id } });
     if (!exists) {
-      throw new NotFound(`Mentorship with ID ${id} not found`);
+      throw new NotFound(`Investment with ID ${id} not found`);
     }
 
-    return prisma.mentorship.delete({
+    return prisma.investment.delete({
       where: { id },
       include: {
-        mentor: {
+        investor: {
           select: {
             id: true,
             name: true,
             email: true,
-            expertise: true,
+            investorProfile: true,
           },
         },
         startup: {
@@ -294,7 +253,7 @@ const remove = async (id) => {
     if (error instanceof NotFound) {
       throw error;
     }
-    throw new Error(`Error deleting mentorship: ${error.message}`);
+    throw new Error(`Error deleting investment: ${error.message}`);
   }
 };
 
@@ -304,4 +263,4 @@ module.exports = {
   create,
   update,
   remove,
-};
+}; 

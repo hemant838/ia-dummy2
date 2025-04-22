@@ -77,12 +77,7 @@ const updateProgram = async (req, res, next) => {
     }
 
     const updated = await programService.update(id, payload);
-    return response.success(
-      req,
-      res,
-      updated,
-      'Program updated successfully',
-    );
+    return response.success(req, res, updated, 'Program updated successfully');
   } catch (err) {
     return next(err);
   }
@@ -96,12 +91,7 @@ const deleteProgram = async (req, res, next) => {
     }
 
     const deleted = await programService.remove(id);
-    return response.success(
-      req,
-      res,
-      deleted,
-      'Program deleted successfully',
-    );
+    return response.success(req, res, deleted, 'Program deleted successfully');
   } catch (err) {
     return next(err);
   }
@@ -113,4 +103,4 @@ module.exports = {
   createProgram,
   updateProgram,
   deleteProgram,
-}; 
+};

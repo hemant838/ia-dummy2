@@ -140,8 +140,8 @@ const create = async (data) => {
 
     // If userId is provided, validate user exists
     if (data.userId) {
-      const user = await prisma.user.findUnique({
-        where: { id: data.userId },
+      const user = await prisma.contact.findUnique({
+        where: { userId: data.userId },
       });
       if (user) {
         throw new ValidationErrors(

@@ -11,11 +11,6 @@ router.post(
   middlewares.auth.authenticateAuthJWT,
   authController.logout,
 );
-router.get(
-  '/user',
-  middlewares.auth.authenticateAuthJWT,
-  authController.getProfile,
-);
 router.get('/refresh-token', authController.refresh);
 
 module.exports = router;

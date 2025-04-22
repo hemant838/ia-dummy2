@@ -1,20 +1,20 @@
-const { mentorshipService } = require('../services');
+const { investmentService } = require('../services');
 const { BadRequest, NotFound } = require('../exceptions');
 const { response, pagination } = require('../helpers');
 
-const getAllMentorships = async (req, res, next) => {
+const getAllInvestments = async (req, res, next) => {
   try {
     const { page, pageSize, skip, take } = pagination.getPaginationParams(
       req.query,
     );
-    const { mentorId, startupId, active, search } = req.query;
+    const { investorId, startupId, type, search } = req.query;
 
-    const { data, total } = await mentorshipService.fetchAll({
+    const { data, total } = await investmentService.fetchAll({
       skip,
       take,
-      mentorId,
+      investorId,
       startupId,
-      active: active === 'true',
+      type,
       search,
     });
 
@@ -28,41 +28,41 @@ const getAllMentorships = async (req, res, next) => {
       req,
       res,
       paginatedResponse,
-      'Mentorships retrieved successfully',
+      'Investments retrieved successfully',
     );
   } catch (err) {
     return next(err);
   }
 };
 
-const getMentorshipById = async (req, res, next) => {
+const getInvestmentById = async (req, res, next) => {
   try {
     const { id } = req.params;
     if (!id) {
-      throw new BadRequest('Mentorship ID is required');
+      throw new BadRequest('Investment ID is required');
     }
 
-    const mentorship = await mentorshipService.fetchById(id);
+    const investment = await investmentService.fetchById(id);
     return response.success(
       req,
       res,
-      mentorship,
-      'Mentorship retrieved successfully',
+      investment,
+      'Investment retrieved successfully',
     );
   } catch (err) {
     return next(err);
   }
 };
 
-const createMentorship = async (req, res, next) => {
+const createInvestment = async (req, res, next) => {
   try {
     const payload = req.body;
-    const newMentorship = await mentorshipService.create(payload);
+    const newInvestment = await investmentService.create(payload);
     return response.success(
       req,
       res,
-      newMentorship,
-      'Mentorship created successfully',
+      newInvestment,
+      'Investment created successfully',
       201,
     );
   } catch (err) {
@@ -70,40 +70,40 @@ const createMentorship = async (req, res, next) => {
   }
 };
 
-const updateMentorship = async (req, res, next) => {
+const updateInvestment = async (req, res, next) => {
   try {
     const { id } = req.params;
     const payload = req.body;
 
     if (!id) {
-      throw new BadRequest('Mentorship ID is required');
+      throw new BadRequest('Investment ID is required');
     }
 
-    const updated = await mentorshipService.update(id, payload);
+    const updated = await investmentService.update(id, payload);
     return response.success(
       req,
       res,
       updated,
-      'Mentorship updated successfully',
+      'Investment updated successfully',
     );
   } catch (err) {
     return next(err);
   }
 };
 
-const deleteMentorship = async (req, res, next) => {
+const deleteInvestment = async (req, res, next) => {
   try {
     const { id } = req.params;
     if (!id) {
-      throw new BadRequest('Mentorship ID is required');
+      throw new BadRequest('Investment ID is required');
     }
 
-    const deleted = await mentorshipService.remove(id);
+    const deleted = await investmentService.remove(id);
     return response.success(
       req,
       res,
       deleted,
-      'Mentorship deleted successfully',
+      'Investment deleted successfully',
     );
   } catch (err) {
     return next(err);
@@ -111,9 +111,9 @@ const deleteMentorship = async (req, res, next) => {
 };
 
 module.exports = {
-  getAllMentorships,
-  getMentorshipById,
-  createMentorship,
-  updateMentorship,
-  deleteMentorship,
+  getAllInvestments,
+  getInvestmentById,
+  createInvestment,
+  updateInvestment,
+  deleteInvestment,
 };
