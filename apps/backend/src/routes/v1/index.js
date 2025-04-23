@@ -17,7 +17,7 @@ const startupApplicationRoutes = require('./startup-application');
 // router.get('/', controller.commonController.index);
 // router.get('/health', controller.commonController.health);
 
-router.use('/', authRoutes);
+router.use('/auth', authRoutes);
 router.use('/user', userRoutes);
 router.use('/startup', startupRoutes);
 router.use('/contact', contactRoutes);

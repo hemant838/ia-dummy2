@@ -75,7 +75,7 @@ const FormItem = React.forwardRef<FormItemElement, FormItemProps>(
       <FormItemContext.Provider value={{ id }}>
         <div
           ref={ref}
-          className={cn('space-y-2', className)}
+          className={cn('space-y-1', className)}
           {...props}
         />
       </FormItemContext.Provider>
@@ -101,7 +101,7 @@ const FormLabel = React.forwardRef<FormLabelElement, FormLabelProps>(
         {...props}
       >
         {children}
-        {required && <span className="align-top">*</span>}
+        {required && <span className="align-top text-primary">*</span>}
       </Label>
     );
   }

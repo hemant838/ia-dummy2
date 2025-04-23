@@ -5,6 +5,7 @@ import { fontFamily } from 'tailwindcss/defaultTheme';
 const config = {
   darkMode: ['class'],
   content: [
+    '../../apps/admin/**/*.{ts,tsx}',
     '../../apps/dashboard/**/*.{ts,tsx}',
     '../../apps/marketing/**/*.{ts,tsx}',
     '../../packages/ui/**/*.{ts,tsx}',
@@ -16,6 +17,7 @@ const config = {
     '!**/build',
     '!**/dist'
   ],
+  safelist: ['gap-5.5', 'space-y-3', 'space-y-1.5'],
   theme: {
     container: {
       center: true,
@@ -76,7 +78,9 @@ const config = {
       },
       backgroundImage: {
         'diagonal-lines':
-          'repeating-linear-gradient(-45deg, hsl(var(--background)), hsl(var(--border)) 1px, hsl(var(--background)) 1px, hsl(var(--background)) 8px)'
+          'repeating-linear-gradient(-45deg, hsl(var(--background)), hsl(var(--border)) 1px, hsl(var(--background)) 1px, hsl(var(--background)) 8px)',
+        'linear-gradient':
+          'linear-gradient(226.99deg, #F7AFB2 0%, #F17075 39.76%, #F05259 100%)'
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -163,6 +167,9 @@ const config = {
         slideIn: 'slideIn 0.3s ease-in-out',
         marquee: 'marquee var(--duration) linear infinite',
         'marquee-vertical': 'marquee-vertical var(--duration) linear infinite'
+      },
+      spacing: {
+        5.5: '1.375rem'
       }
     }
   },

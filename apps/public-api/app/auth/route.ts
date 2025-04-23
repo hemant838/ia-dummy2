@@ -2,7 +2,7 @@ import { withAuth } from '~/lib/with-auth';
 
 /**
  * @swagger
- * /auth/login:
+ * /auth/sign-in:
  *   post:
  *     summary: User login
  *     description: Authenticate a user and return a JWT token
@@ -55,8 +55,8 @@ import { withAuth } from '~/lib/with-auth';
  *         description: Invalid credentials
  *       422:
  *         description: Validation error
- * 
- * /auth/register:
+ *
+ * /auth/sign-up:
  *   post:
  *     summary: User registration
  *     description: Register a new user account
@@ -117,10 +117,10 @@ import { withAuth } from '~/lib/with-auth';
 // Note: Actual route handlers will be implemented here
 export const POST = withAuth(async function (req, ctx) {
   // Implementation will go here
-  return new Response(JSON.stringify({ message: "Not implemented" }), {
+  return new Response(JSON.stringify({ message: 'Not implemented' }), {
     status: 501,
     headers: {
       'Content-Type': 'application/json'
     }
   });
-}); 
+});
