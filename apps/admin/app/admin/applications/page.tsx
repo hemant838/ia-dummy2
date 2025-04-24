@@ -16,5 +16,5 @@ export const metadata: Metadata = {
 export default async function ApplicationsPage(): Promise<React.JSX.Element> {
   const token = await getJWTToken();
 
-  return <div className="relative min-h-screen bg-background">{/*  */}</div>;
+  return <div className="relative h-full w-full">{/*  */}</div>;
 }

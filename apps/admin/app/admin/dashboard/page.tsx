@@ -17,7 +17,7 @@ export default async function DashboardPage(): Promise<React.JSX.Element> {
   const token = await getJWTToken();
 
   return (
-    <div className="relative w-full min-h-screen">
+    <div className="relative w-full h-full">
       <h1>Dashboard</h1>
     </div>
   );
