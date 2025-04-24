@@ -13,42 +13,41 @@ import { verifyEmail } from './verification';
 
 export const events = {
   async signIn({ user, account, profile, isNewUser }) {
-    if (user && user.id) {
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { lastLogin: new Date() },
-        select: {
-          id: true // SELECT NONE
-        }
-      });
-
-      if (isNewUser && user.email) {
-        if (account?.provider === OAuthProvider.Google) {
-          await verifyEmail(user.email);
-          await tryCopyGoogleImage(user, profile);
-          if (user.name) {
-            await sendWelcomeEmail({
-              recipient: user.email!,
-              appName: APP_NAME,
-              name: user.name,
-              getStartedLink: routes.dashboard.organizations.Index
-            });
-          }
-        }
-        if (account?.provider === OAuthProvider.MicrosoftEntraId) {
-          await verifyEmail(user.email);
-          await tryCopyMicrosoftGraphImage(user, account);
-          if (user.name) {
-            await sendWelcomeEmail({
-              recipient: user.email!,
-              appName: APP_NAME,
-              name: user.name,
-              getStartedLink: routes.dashboard.organizations.Index
-            });
-          }
-        }
-      }
-    }
+    // if (user && user.id) {
+    //   await prisma.user.update({
+    //     where: { id: user.id },
+    //     data: { lastLogin: new Date() },
+    //     select: {
+    //       id: true // SELECT NONE
+    //     }
+    //   });
+    //   if (isNewUser && user.email) {
+    //     if (account?.provider === OAuthProvider.Google) {
+    //       await verifyEmail(user.email);
+    //       await tryCopyGoogleImage(user, profile);
+    //       if (user.name) {
+    //         await sendWelcomeEmail({
+    //           recipient: user.email!,
+    //           appName: APP_NAME,
+    //           name: user.name,
+    //           getStartedLink: routes.dashboard.organizations.Index
+    //         });
+    //       }
+    //     }
+    //     if (account?.provider === OAuthProvider.MicrosoftEntraId) {
+    //       await verifyEmail(user.email);
+    //       await tryCopyMicrosoftGraphImage(user, account);
+    //       if (user.name) {
+    //         await sendWelcomeEmail({
+    //           recipient: user.email!,
+    //           appName: APP_NAME,
+    //           name: user.name,
+    //           getStartedLink: routes.dashboard.organizations.Index
+    //         });
+    //       }
+    //     }
+    //   }
+    // }
   },
   async signOut(message) {
     if ('session' in message && message.session?.sessionToken) {

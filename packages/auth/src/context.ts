@@ -1,41 +1,39 @@
+// import { log } from 'console';
 import { cache } from 'react';
-import { headers } from 'next/headers';
+// import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
+import { getJWTToken } from '@workspace/auth/jwtAccessToken';
 import { getRedirectToSignIn } from '@workspace/auth/redirect';
 import { checkSession } from '@workspace/auth/session';
-import { prisma } from '@workspace/database/client';
+// import { prisma } from '@workspace/database/client';
 import { routes } from '@workspace/routes';
 
-import { dedupedAuth, signOut } from '.';
+import { dedupedAuth } from '.';
 
 const dedupedGetActiveOrganization = cache(async function () {
-  // Read organization slug from the HTTP header
-  const headerList = await headers();
-  const organizationSlug = headerList.get('x-organization-slug');
-  if (!organizationSlug) {
-    // Instead of not-found we can just redirect.
-    console.warn('No organization slug in headers. Check middleware.');
-    return redirect(routes.dashboard.organizations.Index);
-  }
+  const tokenUser = await getJWTToken();
+  const { jwtToken } = tokenUser;
 
-  const organization = await prisma.organization.findFirst({
-    where: { slug: organizationSlug },
-    select: {
-      id: true,
-      logo: true,
-      name: true,
-      tier: true,
-      stripeCustomerId: true,
-      slug: true,
-      memberships: {
-        select: {
-          userId: true
-        }
+  const userInfo = await dedupedGetUserInfo(tokenUser.id);
+
+  const organizationId = userInfo?.data?.organizationId;
+
+  const response: any = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/v1/api/organization/${organizationId}`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${jwtToken}`
       }
     }
-  });
-  if (!organization) {
+  );
+
+  const organizationData: any = await response.json();
+  const organization = organizationData?.data;
+
+  if (!organization || !organizationData.status) {
     // Instead of not-found we can just redirect.
     return redirect(routes.dashboard.organizations.Index);
   }
@@ -46,24 +44,50 @@ const dedupedGetActiveOrganization = cache(async function () {
   };
 });
 
-const dedupedGetUserInfo = cache(async function (userId: string) {
-  const userInfo = await prisma.user.findFirst({
-    where: { id: userId },
-    select: {
-      completedOnboarding: true,
-      memberships: {
-        select: {
-          organizationId: true,
-          role: true,
-          isOwner: true
-        }
+const dedupedGetUserInfo = cache(async function (userId?: string) {
+  const tokenUser = await getJWTToken();
+  const { jwtToken } = tokenUser;
+
+  const response: any = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/v1/api/user`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${jwtToken}`
       }
     }
-  });
-  if (!userInfo) {
+  );
+
+  const userInfo: any = await response.json();
+
+  if (!userInfo || !userInfo.status || !userInfo.data) {
     // Should not happen, but if it does let's sign out the user.
     // One possible scenario is if someone is fiddling with the database while a user is still logged in.
-    return signOut({ redirectTo: routes.dashboard.auth.SignIn });
+    const logoutResponse = await fetch(
+      `${process.env.NEXT_PUBLIC_DASHBOARD_URL}/api/auth/signout`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    const logoutInfo: any = await logoutResponse.json();
+
+    if (logoutInfo.status !== 200) {
+      console.error('Error signing out user', logoutInfo);
+      return;
+    }
+
+    return {
+      error: 'Session expired. Please sign in again.',
+      status: false,
+      code: 401,
+      logout: true,
+      session: null
+    };
   }
 
   return userInfo;
@@ -77,11 +101,19 @@ export async function getAuthContext() {
 
   const userInfo = await dedupedGetUserInfo(session.user.id);
 
+  if (userInfo.error || !userInfo.status) {
+    return {
+      ...userInfo,
+      session: null
+    };
+  }
+
   const enrichedSession = {
     ...session,
     user: {
       ...session.user,
-      ...userInfo
+      ...userInfo.data,
+      completedOnboarding: true
     }
   };
 
@@ -96,12 +128,14 @@ export async function getAuthOrganizationContext() {
 
   const activeOrganization = await dedupedGetActiveOrganization();
   const userInfo = await dedupedGetUserInfo(session.user.id);
-  if (
-    !userInfo.memberships.some((m) => m.organizationId == activeOrganization.id)
-  ) {
-    // Instead of forbidden we can just redirect.
-    return redirect(routes.dashboard.organizations.Index);
-  }
+  // if (
+  //   !userInfo?.memberships?.some(
+  //     (m: any) => m.organizationId == activeOrganization.id
+  //   )
+  // ) {
+  //   // Instead of forbidden we can just redirect.
+  //   return redirect(routes.dashboard.organizations.Index);
+  // }
 
   const enrichedSession = {
     ...session,

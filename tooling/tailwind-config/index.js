@@ -17,7 +17,7 @@ const config = {
     '!**/build',
     '!**/dist'
   ],
-  safelist: ['gap-5.5', 'space-y-3', 'space-y-1.5'],
+  safelist: ['gap-5.5', 'space-y-3', 'space-y-1.5', 'border-l-primary'],
   theme: {
     container: {
       center: true,

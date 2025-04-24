@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 
 export default async function OnboardingFullPage(): Promise<React.JSX.Element> {
   const ctx = await getAuthContext();
-  if (ctx.session.user.completedOnboarding) {
+  if (ctx?.session?.user?.completedOnboarding) {
     return redirect(routes.dashboard.organizations.Index);
   }
   if (

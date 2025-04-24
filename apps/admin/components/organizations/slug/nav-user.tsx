@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import NiceModal from '@ebay/nice-modal-react';
-import { MoreHorizontalIcon } from 'lucide-react';
+import { ChevronsUpDown } from 'lucide-react';
 
 import { replaceOrgSlug, routes } from '@workspace/routes';
 import {
@@ -166,8 +166,11 @@ export function NavUser({
                   <span className="truncate text-sm font-semibold">
                     {profile.name}
                   </span>
+                  <span className="truncate text-xs text-slate-700 dark:text-slate-400">
+                    {profile.email}
+                  </span>
                 </div>
-                <MoreHorizontalIcon className="h-8 text-muted-foreground group-data-[minimized=true]:hidden" />
+                <ChevronsUpDown className="h-8 text-muted-foreground group-data-[minimized=true]:hidden" />
               </SidebarMenuButton>
             </DropdownMenuTrigger>
             <DropdownMenuContent

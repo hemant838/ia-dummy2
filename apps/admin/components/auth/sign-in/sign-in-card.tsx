@@ -76,9 +76,7 @@ export function SignInCard({
       return;
     }
     setIsLoading(true);
-    console.log('here values', values);
     const result = await signInWithCredentials(values);
-    console.log('here result', result);
 
     if (result?.validationErrors?._errors) {
       const errorCode = result.validationErrors._errors[0] as AuthErrorCode;

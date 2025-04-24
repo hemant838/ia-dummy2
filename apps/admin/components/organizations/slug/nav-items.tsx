@@ -1,14 +1,18 @@
 import {
   BellIcon,
+  CalendarHeart,
   CodeIcon,
+  Contact,
   CreditCardIcon,
-  HomeIcon,
+  FileText,
+  GraduationCap,
+  Hotel,
+  LayoutGrid,
   LockKeyholeIcon,
   SettingsIcon,
   StoreIcon,
   UserIcon,
-  UserPlus2Icon,
-  UsersIcon
+  UserPlus2Icon
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -25,22 +29,34 @@ type NavItem = {
 export function createMainNavItems(slug: string): NavItem[] {
   return [
     {
-      title: 'Home',
-      href: replaceOrgSlug(routes.dashboard.organizations.slug.Home, slug),
-      icon: HomeIcon
+      title: 'Dashboard',
+      href: routes.dashboard.admin.routes.Index,
+      icon: LayoutGrid
+    },
+    {
+      title: 'Programs',
+      href: routes.dashboard.admin.routes.Programs,
+      icon: CalendarHeart
+    },
+    {
+      title: 'Applications',
+      href: routes.dashboard.admin.routes.Applications,
+      icon: FileText
+    },
+    {
+      title: 'Thesis',
+      href: routes.dashboard.admin.routes.Thesis,
+      icon: GraduationCap
+    },
+    {
+      title: 'Companies',
+      href: routes.dashboard.admin.routes.Companies,
+      icon: Hotel
     },
     {
       title: 'Contacts',
-      href: replaceOrgSlug(routes.dashboard.organizations.slug.Contacts, slug),
-      icon: UsersIcon
-    },
-    {
-      title: 'Settings',
-      href: replaceOrgSlug(
-        routes.dashboard.organizations.slug.settings.Index,
-        slug
-      ),
-      icon: SettingsIcon
+      href: routes.dashboard.admin.routes.Contacts,
+      icon: Contact
     }
   ];
 }

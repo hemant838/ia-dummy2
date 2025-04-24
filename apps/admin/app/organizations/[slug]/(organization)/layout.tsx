@@ -26,6 +26,9 @@ export default async function OrganizationLayout(
     getFavorites(),
     getProfile()
   ]);
+
+  console.log(organizations, ctx.organization);
+
   return (
     <div className="flex flex-col size-full overflow-hidden">
       <Providers

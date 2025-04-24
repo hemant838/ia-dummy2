@@ -28,7 +28,7 @@ export async function getJWTToken() {
   const rawToken: any = await getRawJwtTokenFromCookie();
 
   if (!rawToken) {
-    console.error('No session token found in cookies');
+    console.warn('No session token found in cookies');
     return null;
   }
 

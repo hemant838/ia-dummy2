@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import Image from 'next/image';
 
 import { ScrollArea } from '@workspace/ui/components/scroll-area';
 import {
@@ -33,8 +34,14 @@ export function AppSidebar({
 }: AppSidebarProps): React.JSX.Element {
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="flex h-14 flex-row items-center py-0">
-        <OrganizationSwitcher organizations={organizations} />
+      <SidebarHeader className="flex h-14 flex-row items-center justify-start py-0 bg-whitwe dark:bg-background">
+        <Image
+          src="/assets/logos/india-accelerator.svg"
+          alt="india accelerator logo"
+          width={32}
+          height={32}
+          className="h-8 w-auto"
+        />
       </SidebarHeader>
       <SidebarContent className="overflow-hidden">
         <ScrollArea
@@ -43,11 +50,6 @@ export function AppSidebar({
           className="h-full [&>[data-radix-scroll-area-viewport]>div]:!flex [&>[data-radix-scroll-area-viewport]>div]:h-full [&>[data-radix-scroll-area-viewport]>div]:flex-col"
         >
           <NavMain />
-          <NavFavorites favorites={favorites} />
-          <NavSupport
-            profile={profile}
-            className="mt-auto pb-0"
-          />
         </ScrollArea>
       </SidebarContent>
       <SidebarFooter className="h-14">

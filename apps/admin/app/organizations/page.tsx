@@ -18,10 +18,8 @@ export const metadata: Metadata = {
 };
 
 export default async function OrganizationsPage(): Promise<React.JSX.Element> {
-  const organizations = await getOrganizations();
   const token = await getJWTToken();
-
-  console.log('here', token);
+  const organizations: any = await getOrganizations();
 
   return (
     <div className="relative min-h-screen bg-background">

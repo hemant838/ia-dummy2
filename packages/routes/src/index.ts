@@ -44,6 +44,17 @@ export const routes = {
       }
     },
     Index: `${baseUrl.Dashboard}/`,
+    admin: {
+      Index: `${baseUrl.Dashboard}/admin`,
+      routes: {
+        Index: `${baseUrl.Dashboard}/admin/dashboard`,
+        Programs: `${baseUrl.Dashboard}/admin/programs`,
+        Applications: `${baseUrl.Dashboard}/admin/applications`,
+        Thesis: `${baseUrl.Dashboard}/admin/thesis`,
+        Companies: `${baseUrl.Dashboard}/admin/companies`,
+        Contacts: `${baseUrl.Dashboard}/admin/contacts`
+      }
+    },
     invitations: {
       AlreadyAccepted: `${baseUrl.Dashboard}/invitations/already-accepted`,
       Index: `${baseUrl.Dashboard}/invitations`,
@@ -78,6 +89,9 @@ export const routes = {
           }
         }
       }
+    },
+    dashboard: {
+      Index: `${baseUrl.Dashboard}/dashboard`
     }
   },
   marketing: {

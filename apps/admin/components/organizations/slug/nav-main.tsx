@@ -21,7 +21,10 @@ export function NavMain(props: SidebarGroupProps): React.JSX.Element {
   const pathname = usePathname();
   const activeOrganization = useActiveOrganization();
   return (
-    <SidebarGroup {...props}>
+    <SidebarGroup
+      className="px-0"
+      {...props}
+    >
       <SidebarMenu>
         {createMainNavItems(activeOrganization.slug).map((item, index) => {
           const isActive = pathname.startsWith(
@@ -32,16 +35,24 @@ export function NavMain(props: SidebarGroupProps): React.JSX.Element {
               <SidebarMenuButton
                 asChild
                 isActive={isActive}
+                className="rounded-none text-sm font-normal"
                 tooltip={item.title}
               >
                 <Link
                   href={item.disabled ? '~/' : item.href}
                   target={item.external ? '_blank' : undefined}
+                  className={cn(
+                    'px-3 relative',
+                    isActive ? 'text-slate-800' : 'text-slate-600'
+                  )}
                 >
+                  {isActive && (
+                    <div className="absolute h-full w-[2px] left-0 top-0 bg-primary" />
+                  )}
                   <item.icon
                     className={cn(
                       'size-4 shrink-0',
-                      isActive ? 'text-foreground' : 'text-muted-foreground'
+                      isActive ? 'text-slate-800' : 'text-slate-600'
                     )}
                   />
                   <span

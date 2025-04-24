@@ -11,23 +11,23 @@ const JWT_SECRET = config.jwtSecret;
 const ACCESS_TOKEN_EXPIRY = '15m';
 const REFRESH_TOKEN_EXPIRY = '30d';
 
-function generateTokens(user) {
-  const payload = {
-    userId: user.id,
-    email: user.email,
-    emailVerified: user.emailVerified || false,
-    role: user.role,
-  };
+// function generateTokens(user) {
+//   const payload = {
+//     userId: user.id,
+//     email: user.email,
+//     emailVerified: user.emailVerified || false,
+//     role: user.role,
+//   };
 
-  const accessToken = jwt.sign(payload, JWT_SECRET, {
-    expiresIn: ACCESS_TOKEN_EXPIRY,
-  });
-  const refreshToken = jwt.sign(payload, JWT_SECRET, {
-    expiresIn: REFRESH_TOKEN_EXPIRY,
-  });
+//   const accessToken = jwt.sign(payload, JWT_SECRET, {
+//     expiresIn: ACCESS_TOKEN_EXPIRY,
+//   });
+//   const refreshToken = jwt.sign(payload, JWT_SECRET, {
+//     expiresIn: REFRESH_TOKEN_EXPIRY,
+//   });
 
-  return { accessToken, refreshToken };
-}
+//   return { accessToken, refreshToken };
+// }
 
 login = async ({ email, password }) => {
   if (!email || !password) {
@@ -40,9 +40,9 @@ login = async ({ email, password }) => {
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) throw new Unauthorized('Invalid email or password');
 
-  const token = generateTokens(user);
+  // const token = generateTokens(user);
 
-  return { ...token, user };
+  return { user };
 };
 
 register = async (payload) => {
@@ -68,13 +68,17 @@ register = async (payload) => {
     },
   });
 
-  const token = generateTokens(newUser);
+  // const token = generateTokens(newUser);
 
-  return { ...token, user: newUser };
+  return { user: newUser };
 };
 
 logout = async (user) => {
   // Optional: Invalidate session if using JWT blacklisting or session model
+  res.clearCookie('next-auth.session-token');
+  res.clearCookie('__Secure-next-auth.session-token');
+  res.clearCookie('next-auth.csrf-token');
+
   return true;
 };
 
@@ -86,9 +90,9 @@ refreshTokens = async (refreshToken) => {
     });
     if (!user) throw new Unauthorized('User not found');
 
-    const token = generateTokens(user);
+    // const token = generateTokens(user);
 
-    return { ...token, user };
+    return { user };
   } catch (err) {
     throw new Unauthorized('Invalid or expired refresh token');
   }
@@ -98,6 +102,6 @@ module.exports = {
   login,
   register,
   logout,
-  generateTokens,
+  // generateTokens,
   refreshTokens,
 };

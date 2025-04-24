@@ -69,37 +69,51 @@ export const providers = [
       const normalizedEmail = parsedCredentials.email.toLowerCase();
       checkRateLimitAndThrowError(normalizedEmail);
 
-      const user = await prisma.user.findUnique({
-        where: { email: normalizedEmail },
-        select: {
-          id: true,
-          password: true,
-          email: true,
-          emailVerified: true,
-          name: true
-        }
-      });
+      const payload = {
+        email: normalizedEmail,
+        password: (credentials as any)?.password
+      };
 
-      if (!user || !user.password || !user.email) {
+      // Call backend login API
+      const response: any = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/v1/api/auth/sign-in`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        }
+      );
+
+      const user: any = await response.json();
+
+      if (!user || !user.status || !user.data) {
         throw new IncorrectEmailOrPasswordError();
       }
 
       const isCorrectPassword = await verifyPassword(
         parsedCredentials.password,
-        user.password
+        user.data.user.password
       );
+
       if (!isCorrectPassword) {
         throw new IncorrectEmailOrPasswordError();
       }
 
-      if (!user.emailVerified || isBefore(new Date(), user.emailVerified)) {
-        throw new UnverifiedEmailError();
-      }
+      // UNCOMMENT THIS LATER
+
+      // if (
+      //   !user.data.user.emailVerified ||
+      //   isBefore(new Date(), user.data.user.emailVerified)
+      // ) {
+      //   throw new UnverifiedEmailError();
+      // }
 
       return {
-        id: user.id,
-        email: user.email,
-        name: user.name
+        id: user.data.user.id,
+        email: user.data.user.email,
+        name: user.data.user.name
       };
     }
   }),

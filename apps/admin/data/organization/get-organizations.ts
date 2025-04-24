@@ -3,7 +3,8 @@ import 'server-only';
 import { unstable_cache as cache } from 'next/cache';
 
 import { getAuthContext } from '@workspace/auth/context';
-import { prisma } from '@workspace/database/client';
+// import { prisma } from '@workspace/database/client';
+import { getJWTToken } from '@workspace/auth/jwtAccessToken';
 
 import {
   Caching,
@@ -15,46 +16,37 @@ import type { OrganizationDto } from '~/types/dtos/organization-dto';
 export async function getOrganizations(): Promise<OrganizationDto[]> {
   const ctx = await getAuthContext();
 
+  const tokenUser = await getJWTToken();
+  const { jwtToken } = tokenUser;
+
   return cache(
     async () => {
-      const organizations = await prisma.organization.findMany({
-        where: {
-          memberships: {
-            some: {
-              userId: ctx.session.user.id
-            }
-          }
-        },
-        select: {
-          id: true,
-          logo: true,
-          name: true,
-          slug: true,
-          _count: {
-            select: {
-              memberships: true
-            }
-          },
-          memberships: {
-            where: { userId: ctx.session.user.id },
-            select: { createdAt: true }
+      const orgResponse: any = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/v1/api/organization?userId=${tokenUser.id}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${jwtToken}`
           }
         }
-      });
+      );
 
-      const response: OrganizationDto[] = organizations
-        .sort(
-          (a, b) =>
-            a.memberships[0].createdAt.getTime() -
-            b.memberships[0].createdAt.getTime()
-        )
-        .map((organization) => ({
+      const organizationData: any = await orgResponse.json();
+
+      const organizations = organizationData?.data?.data;
+
+      const response: OrganizationDto[] = organizations.map(
+        (organization: any) => ({
           id: organization.id,
           logo: organization.logo ? organization.logo : undefined,
           name: organization.name,
-          slug: organization.slug,
-          memberCount: organization._count.memberships
-        }));
+          slug: organization.name
+            ? organization.name?.toLowerCase()?.trim()?.replace(/\s+/g, '-')
+            : undefined,
+          memberCount: organization.users.length
+        })
+      );
 
       return response;
     },

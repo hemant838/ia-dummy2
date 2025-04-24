@@ -30,7 +30,7 @@ export default async function AuthLayout({
 }: React.PropsWithChildren): Promise<React.JSX.Element> {
   const session = await dedupedAuth();
   if (!isChangeEmailRoute() && session) {
-    return redirect(routes.dashboard.organizations.Index);
+    return redirect(routes.dashboard.admin.routes.Index);
   }
   return (
     <main className="h-screen w-screen dark:bg-background bg-white">
