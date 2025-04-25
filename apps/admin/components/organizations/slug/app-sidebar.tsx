@@ -33,7 +33,10 @@ export function AppSidebar({
   profile
 }: AppSidebarProps): React.JSX.Element {
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar
+      className="z-0"
+      collapsible="icon"
+    >
       <SidebarHeader className="flex h-14 flex-row items-center justify-start py-0 bg-whitwe dark:bg-background">
         <Image
           src="/assets/logos/india-accelerator.svg"

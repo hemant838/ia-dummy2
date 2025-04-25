@@ -3,13 +3,13 @@ import { type Metadata } from 'next';
 import Link from 'next/link';
 import { LogIn } from 'lucide-react';
 
-import { getJWTToken } from '@workspace/auth/jwtAccessToken';
 import { APP_NAME } from '@workspace/common/app';
 import { InvitationStatus } from '@workspace/database';
 import { routes } from '@workspace/routes';
 import { Button } from '@workspace/ui/components/button';
 
 import { RootTable } from '~/components/admin/table';
+import { getPrograms } from '~/data/programs/get-programs';
 import { createTitle } from '~/lib/formatters';
 
 const PageTitle = ({ title, pageName }: any): React.JSX.Element => {
@@ -39,7 +39,17 @@ export const metadata: Metadata = {
 };
 
 export default async function ProgramsPage(): Promise<React.JSX.Element> {
-  const token = await getJWTToken();
+  const programs: any = await getPrograms();
+
+  // const [programs, setPrograms] = React.useState<any>([]);
+
+  // React.useEffect(() => {
+  //   const fetchPrograms = async () => {
+  //     const data = await getPrograms();
+  //     setPrograms(data);
+  //   };
+  //   fetchPrograms();
+  // }, []);
 
   return (
     <div className="relative h-full w-full space-y-3">
@@ -75,42 +85,7 @@ export default async function ProgramsPage(): Promise<React.JSX.Element> {
             accessorKey: 'actions'
           }
         ]}
-        lineItems={[
-          {
-            programTitle: 'Program Title 1',
-            startDate: '9/23/16',
-            endDate: '9/23/16',
-            applicationNo: '23',
-            status: 'PENDING',
-            actions: (
-              <Link
-                href={routes.dashboard.admin.routes.Programs}
-                className="flex items-center gap-x-2 text-sm font-medium text-primary-foreground"
-              >
-                <span>Edit</span>
-                <span className="text-muted-foreground">|</span>
-                <span className="text-muted-foreground">View</span>
-              </Link>
-            )
-          },
-          {
-            programTitle: 'Program Title 2',
-            startDate: '9/23/16',
-            endDate: '9/23/16',
-            applicationNo: '23',
-            status: 'PENDING',
-            actions: (
-              <Link
-                href={routes.dashboard.admin.routes.Programs}
-                className="flex items-center gap-x-2 text-sm font-medium text-primary-foreground"
-              >
-                <span>Edit</span>
-                <span className="text-muted-foreground">|</span>
-                <span className="text-muted-foreground">View</span>
-              </Link>
-            )
-          }
-        ]}
+        lineItems={programs}
       />
     </div>
   );
