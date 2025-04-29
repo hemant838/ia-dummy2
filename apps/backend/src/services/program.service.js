@@ -42,6 +42,11 @@ const fetchAll = async ({ skip, take, search }) => {
               eventType: true,
             },
           },
+          StartupApplication: {
+            select: {
+              id: true,
+            },
+          },
         },
       }),
       prisma.program.count({ where }),
@@ -273,4 +278,4 @@ module.exports = {
   create,
   update,
   remove,
-}; 
+};

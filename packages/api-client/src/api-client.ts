@@ -1,7 +1,7 @@
 import { getJWTToken } from '@workspace/auth/jwtAccessToken';
 
 export async function apiClient<T>(
-  url: string,
+  endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
   try {
@@ -13,10 +13,13 @@ export async function apiClient<T>(
       'Content-Type': 'application/json'
     };
 
-    const response = await fetch(url, {
-      ...options,
-      headers
-    });
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/v1/api` + `${endpoint}`,
+      {
+        ...options,
+        headers
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json();

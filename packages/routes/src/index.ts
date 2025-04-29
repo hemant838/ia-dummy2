@@ -48,7 +48,12 @@ export const routes = {
       Index: `${baseUrl.Dashboard}/admin`,
       routes: {
         Index: `${baseUrl.Dashboard}/admin/dashboard`,
-        Programs: `${baseUrl.Dashboard}/admin/programs`,
+        programs: {
+          Index: `${baseUrl.Dashboard}/admin/programs`,
+          routes: {
+            CreateProgram: `${baseUrl.Dashboard}/admin/programs/create-program`
+          }
+        },
         Applications: `${baseUrl.Dashboard}/admin/applications`,
         Thesis: `${baseUrl.Dashboard}/admin/thesis`,
         Companies: `${baseUrl.Dashboard}/admin/companies`,

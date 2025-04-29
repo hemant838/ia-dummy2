@@ -1,3 +1,5 @@
+import { format } from 'date-fns'; // Importing date-fns format function
+
 import { APP_NAME } from '@workspace/common/app';
 
 export function createTitle(title: string, addSuffix: boolean = true): string {
@@ -47,4 +49,17 @@ export function getTimeSlot(hours: number, minutes: number): Date {
   date.setMinutes(minutes);
 
   return date;
+}
+
+export function formatDate(dateString: string): string {
+  if (!dateString) {
+    throw new Error('Invalid date string');
+  }
+
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) {
+    throw new Error('Invalid date string');
+  }
+
+  return format(date, 'M/d/yy'); // Formatting the date to "M/d/yy"
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { ChevronDown, InfoIcon } from 'lucide-react';
+import { EllipsisVertical, Filter } from 'lucide-react';
 
 import { Button } from '@workspace/ui/components/button';
 import {
@@ -40,72 +40,77 @@ import {
 } from '~/schemas/filter/program-filter-schema';
 
 export type TableFilter = {
+  showTabFilters?: boolean;
   lineItems?: Array<any>;
   column?: Array<any>;
   className?: string;
+  totalPages?: number;
+  hasPreviousPage?: boolean;
+  hasNextPage?: boolean;
+  currentPage?: number;
+  handleNextPage?: any;
+  handlePrevPage?: any;
+  tabFilters?: Array<any>;
 };
 
-const TableFilter = ({ handleDrawerOpenChange }: any): React.JSX.Element => {
-  const [searchQuery, setSearchQuery] = React.useState<string>('');
-  const [status, setStatus] = React.useState<string>('all_program');
+function getNestedValue(obj: any, path: string): any {
+  return path
+    .split('.')
+    .reduce(
+      (acc, key) => (acc && acc[key] != null ? acc[key] : undefined),
+      obj
+    );
+}
 
-  const handleSearchQueryChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ): void => {
-    setSearchQuery(e.target?.value || '');
-  };
+const TableFilter = ({
+  tabFilters = [],
+  handleDrawerOpenChange,
+  showTabFilters = false
+}: any): React.JSX.Element => {
+  const [searchQuery, setSearchQuery] = React.useState<string>('');
+  const [status, setStatus] = React.useState<string>(
+    tabFilters[0]?.value || ''
+  );
+
+  // const handleSearchQueryChange = (
+  //   e: React.ChangeEvent<HTMLInputElement>
+  // ): void => {
+  //   setSearchQuery(e.target?.value || '');
+  // };
 
   return (
     <div className="flex flex-row w-full items-center justify-between">
-      <TabList
-        tabItems={[
-          {
-            label: 'All program',
-            value: 'all_program'
-          },
-          {
-            label: 'Active program',
-            value: 'active_program'
-          },
-          {
-            label: 'Upcoming program',
-            value: 'upcoming_program'
-          },
-          {
-            label: 'Archived',
-            value: 'archived'
-          },
-          {
-            label: 'Draft',
-            value: 'draft'
-          }
-        ]}
-        onValueChange={(value: any) => {
-          setStatus(value);
-        }}
-        value={status}
-      />
+      <div>
+        {showTabFilters && (
+          <TabList
+            tabItems={tabFilters}
+            onValueChange={(value: any) => {
+              setStatus(value);
+            }}
+            value={status}
+          />
+        )}
+      </div>
 
       <div className="flex items-center gap-x-3">
-        <Input
+        {/* <Input
           placeholder="Filter lines..."
           value={searchQuery}
           className="max-h-[40px] w-[300px]"
           onChange={handleSearchQueryChange}
-        />
+        /> */}
 
         <Button
           variant="outline"
-          className="gap-x-4 font-medium text-secondary-foreground max-h-[40px]"
+          className="gap-x-2 font-medium text-secondary-foreground max-h-[40px]"
           onClick={() => {
             handleDrawerOpenChange(true);
           }}
         >
-          <span>Columns</span>
-
           <span>
-            <ChevronDown className="size-5" />
+            <Filter className="size-5" />
           </span>
+          <span>Filter</span>
         </Button>
       </div>
     </div>
@@ -113,9 +118,17 @@ const TableFilter = ({ handleDrawerOpenChange }: any): React.JSX.Element => {
 };
 
 export function RootTable({
+  showTabFilters = false,
   lineItems = [],
   column = [],
   className,
+  totalPages,
+  currentPage = 1,
+  hasPreviousPage = false,
+  hasNextPage = false,
+  handleNextPage = () => {},
+  handlePrevPage = () => {},
+  tabFilters = [],
   ...other
 }: TableFilter): React.JSX.Element {
   const [showFilterDrawer, setShowFilterDrawer] =
@@ -160,7 +173,11 @@ export function RootTable({
   return (
     <div className="w-full relative space-y-4">
       <div className="w-full space-y-3">
-        <TableFilter handleDrawerOpenChange={handleDrawerOpenChange} />
+        <TableFilter
+          showTabFilters={showTabFilters}
+          handleDrawerOpenChange={handleDrawerOpenChange}
+          tabFilters={tabFilters}
+        />
         <Table
           wrapperClassName="border border-border rounded-lg overflow-y-auto max-h-[526px] bg-white"
           className={cn('w-full', className)}
@@ -190,20 +207,35 @@ export function RootTable({
                 key={index}
                 className="border-b hover:bg-inherit font-normal h-12"
               >
-                <TableCell className="px-4 max-w-[200px] truncate">
-                  {item?.programTitle}
-                </TableCell>
-                <TableCell className="px-4 text-left">
-                  {item?.startDate}
-                </TableCell>
-                <TableCell className="px-4 text-left">
-                  {item?.endDate}
-                </TableCell>
-                <TableCell className="px-4 text-left">
-                  {item?.applicationNo}
-                </TableCell>
-                <TableCell className="px-4 text-left">{item?.status}</TableCell>
-                <TableCell className="px-4 text-left">{/*  */}</TableCell>
+                {column.map((col, colIndex) => {
+                  const value = getNestedValue(item, col.accessorKey);
+
+                  if (col.accessorKey === 'actions') {
+                    return (
+                      <TableCell
+                        key={`cell_${col.accessorKey}_${colIndex}`}
+                        className="px-4 max-w-[42px] truncate"
+                      >
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="font-normal w-[42px] text-sm text-gray-400 h-9 bg-white float-right"
+                        >
+                          <EllipsisVertical />
+                        </Button>
+                      </TableCell>
+                    );
+                  }
+
+                  return (
+                    <TableCell
+                      key={`cell_${col.accessorKey}_${colIndex}`}
+                      className="px-4 max-w-[200px] truncate"
+                    >
+                      {value ?? '-'}
+                    </TableCell>
+                  );
+                })}
               </TableRow>
             ))}
           </TableBody>
@@ -220,6 +252,13 @@ export function RootTable({
             variant="outline"
             size="sm"
             className="gap-x-4 font-normal text-sm text-foreground h-9 bg-white"
+            disabled={!hasPreviousPage}
+            onClick={() => {
+              if (hasPreviousPage) {
+                const count = currentPage - 1;
+                handlePrevPage(count);
+              }
+            }}
           >
             Previous
           </Button>
@@ -228,12 +267,20 @@ export function RootTable({
             variant="outline"
             size="sm"
             className="gap-x-4 font-normal text-sm text-foreground h-9 bg-white"
+            disabled={!hasNextPage}
+            onClick={() => {
+              if (hasNextPage) {
+                const count = currentPage + 1;
+                handleNextPage(count);
+              }
+            }}
           >
             Next
           </Button>
         </div>
       </div>
 
+      {/* Side Filter Drawer */}
       <SideDrawer
         modal={{
           visible: showFilterDrawer,

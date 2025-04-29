@@ -14,10 +14,15 @@ const investmentRoutes = require('./investment');
 const eventRoutes = require('./event');
 const startupApplicationRoutes = require('./startup-application');
 
+const middlewares = require('../../middlewares');
+
 // router.get('/', controller.commonController.index);
 // router.get('/health', controller.commonController.health);
 
 router.use('/auth', authRoutes);
+
+router.use(middlewares.auth.authenticateAuthJWT);
+
 router.use('/user', userRoutes);
 router.use('/startup', startupRoutes);
 router.use('/contact', contactRoutes);

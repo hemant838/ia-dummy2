@@ -35,7 +35,7 @@ export function createMainNavItems(slug: string): NavItem[] {
     },
     {
       title: 'Programs',
-      href: routes.dashboard.admin.routes.Programs,
+      href: routes.dashboard.admin.routes.programs.Index,
       icon: CalendarHeart
     },
     {

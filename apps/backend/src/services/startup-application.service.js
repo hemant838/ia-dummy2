@@ -33,7 +33,11 @@ const fetchAll = async ({
         skip,
         take,
         include: {
-          startup: true,
+          startup: {
+            include: {
+              thesis: true, // 👈 Include the nested `thesis` relation inside `startup`
+            },
+          },
           program: true,
           eir: true,
           notes: true,

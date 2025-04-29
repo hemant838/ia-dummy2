@@ -14,13 +14,13 @@ import { apiClient } from '../../../../packages/api-client/src/api-client';
 //   OrganizationCacheKey
 // } from '~/data/caching';
 
-export async function getPrograms(
+export async function getAllContacts(
   page: number = 1,
   pageSize: number = 8
 ): Promise<string | undefined> {
   try {
     const data: any = await apiClient(
-      `/program?page=${page}&pageSize=${pageSize}`,
+      `/contact?page=${page}&pageSize=${pageSize}`,
       {
         method: 'GET'
       }
@@ -35,13 +35,8 @@ export async function getPrograms(
     const formattedData = result.data.map((item: any) => {
       return {
         ...item,
-        applicationDeadline: formatDate(item?.applicationDeadline),
-        startDate: formatDate(item?.startDate),
-        endDate: formatDate(item?.endDate),
         createdAt: formatDate(item?.createdAt),
-        updatedAt: formatDate(item?.updatedAt),
-        totalApplication: item?.StartupApplication?.length,
-        status: item?.status
+        updatedAt: formatDate(item?.updatedAt)
       };
     });
 
