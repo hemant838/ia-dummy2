@@ -7,7 +7,7 @@ const getAllContacts = async (req, res, next) => {
     const { page, pageSize, skip, take } = pagination.getPaginationParams(
       req.query,
     );
-    const { record, stage, search } = req.query;
+    const { record, stage, search, userType } = req.query;
 
     const { data, total } = await contactService.fetchAll({
       skip,
@@ -15,6 +15,7 @@ const getAllContacts = async (req, res, next) => {
       record,
       stage,
       search,
+      userType,
     });
 
     const paginatedResponse = pagination.getPaginatedResponse(

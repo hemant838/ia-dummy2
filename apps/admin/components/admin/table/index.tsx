@@ -1,7 +1,8 @@
 'use client';
 
 import * as React from 'react';
-import { EllipsisVertical, Filter } from 'lucide-react';
+import Link from 'next/link';
+import { Copy, EllipsisVertical, ExternalLink, Filter } from 'lucide-react';
 
 import { Button } from '@workspace/ui/components/button';
 import {
@@ -12,7 +13,6 @@ import {
   FormMessage,
   FormProvider
 } from '@workspace/ui/components/form';
-import { Input } from '@workspace/ui/components/input';
 import { MultiSelect } from '@workspace/ui/components/multi-select';
 import {
   Select,
@@ -31,41 +31,187 @@ import {
 } from '@workspace/ui/components/table';
 import { cn } from '@workspace/ui/lib/utils';
 
+import { SearchableSelect } from '~/components/admin/form';
 import SideDrawer from '~/components/admin/SideDrawer';
 import TabList from '~/components/admin/tabs';
 import { useZodForm } from '~/hooks/use-zod-form';
+import { getRandomTagColor } from '~/lib/generate-random-tag-color';
+import { copyToClipboard, getNestedValue } from '~/lib/helper';
 import {
   programFilterSchema,
   type ProgramFilterSchema
 } from '~/schemas/filter/program-filter-schema';
+import { TableFilter as TableFilterType } from '~/types/table';
 
-export type TableFilter = {
-  showTabFilters?: boolean;
-  lineItems?: Array<any>;
-  column?: Array<any>;
-  className?: string;
-  totalPages?: number;
-  hasPreviousPage?: boolean;
-  hasNextPage?: boolean;
-  currentPage?: number;
-  handleNextPage?: any;
-  handlePrevPage?: any;
-  tabFilters?: Array<any>;
+const CellSelect = ({ options = [], value }: any) => {
+  const [showDropdown, setShowDropdown] = React.useState(false);
+  const [cellValue, setCellValue] = React.useState(value);
+  const [selectedColors, setSelectedColors] = React.useState<any>({
+    bg: '',
+    border: ''
+  });
+
+  React.useEffect(() => {
+    const color = options.find((opt: any) => opt.value === value)?.color;
+    setSelectedColors(color);
+  }, []);
+
+  return (
+    <div className="relative">
+      <Button
+        variant="ghost"
+        className="hover:bg-transparent px-0 py-0"
+        onClick={() => {
+          setShowDropdown(!showDropdown);
+        }}
+      >
+        <span
+          className={`px-2 py-1 border ${selectedColors.bg} ${selectedColors.border} text-gray-500 rounded-[6px]`}
+        >
+          {cellValue}
+        </span>
+      </Button>
+
+      {showDropdown && (
+        <SearchableSelect
+          data={options}
+          onSelectChange={(selected: any) => {
+            setCellValue(selected?.label);
+            if (selected?.color) {
+              setSelectedColors(selected?.color);
+            }
+
+            setShowDropdown(false);
+          }}
+        />
+      )}
+    </div>
+  );
 };
 
-function getNestedValue(obj: any, path: string): any {
-  return path
-    .split('.')
-    .reduce(
-      (acc, key) => (acc && acc[key] != null ? acc[key] : undefined),
-      obj
+function CellRenderer({ value, type = 'text', options = [] }: any) {
+  if (!value) {
+    return (
+      <div>
+        <span>-</span>
+      </div>
     );
+  }
+
+  switch (type) {
+    case 'input':
+      return (
+        <div>
+          <input
+            type="text"
+            defaultValue={value}
+            className="border p-1 rounded"
+          />
+        </div>
+      );
+    case 'date':
+      return (
+        <div>
+          <input
+            type="date"
+            defaultValue={value}
+            className="border p-1 rounded"
+          />
+        </div>
+      );
+    case 'select': {
+      return (
+        <CellSelect
+          options={options}
+          value={value}
+        />
+      );
+    }
+    case 'tag': {
+      const { bg, border } = React.useMemo(() => getRandomTagColor(), []);
+
+      return (
+        <span
+          className={`px-2 py-1 ${bg} ${border} text-gray-500 rounded-[6px]`}
+        >
+          {value}
+        </span>
+      );
+    }
+    case 'email':
+      return (
+        <div className="flex items-center gap-x-3">
+          <Link
+            href={`mailto:${value}`}
+            className="text-indigo-400 no-underline"
+          >
+            {value}
+          </Link>
+
+          <Button
+            variant="outline"
+            className="w-6 h-6 text-slate-800 px-0 py-0"
+            style={{
+              boxShadow:
+                '#0000000d -2px -1px 4px 0px, #00000005 -2px 4px 4px 0px'
+            }}
+            onClick={() => {
+              copyToClipboard(value);
+            }}
+          >
+            <Copy size={14} />
+          </Button>
+        </div>
+      );
+    case 'url':
+      return (
+        <div className="flex items-center gap-x-3">
+          <Link
+            href={value}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-indigo-400 underline"
+          >
+            {value}
+          </Link>
+
+          <Button
+            variant="outline"
+            className="w-6 h-6 text-slate-800 px-0 py-0"
+            style={{
+              boxShadow:
+                '#0000000d -2px -1px 4px 0px, #00000005 -2px 4px 4px 0px'
+            }}
+            onClick={() => {
+              window.open(`${value}`, '_blank');
+            }}
+          >
+            <ExternalLink size={14} />
+          </Button>
+        </div>
+      );
+    case 'phone':
+      return (
+        <div>
+          <Link
+            href={`tel:${value}`}
+            className="text-[#272833] no-underline"
+          >
+            {value}
+          </Link>
+        </div>
+      );
+    case 'text':
+    default:
+      return <span className="text-slate-800">{value}</span>;
+  }
 }
 
 const TableFilter = ({
   tabFilters = [],
   handleDrawerOpenChange,
-  showTabFilters = false
+  showTabFilters = false,
+  handleTabChange = () => {}
 }: any): React.JSX.Element => {
   const [searchQuery, setSearchQuery] = React.useState<string>('');
   const [status, setStatus] = React.useState<string>(
@@ -86,6 +232,7 @@ const TableFilter = ({
             tabItems={tabFilters}
             onValueChange={(value: any) => {
               setStatus(value);
+              handleTabChange(value);
             }}
             value={status}
           />
@@ -129,8 +276,9 @@ export function RootTable({
   handleNextPage = () => {},
   handlePrevPage = () => {},
   tabFilters = [],
+  handleTabChange = () => {},
   ...other
-}: TableFilter): React.JSX.Element {
+}: TableFilterType): React.JSX.Element {
   const [showFilterDrawer, setShowFilterDrawer] =
     React.useState<boolean>(false);
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
@@ -166,7 +314,6 @@ export function RootTable({
   };
 
   const handleDrawerOpenChange = (open: any): void => {
-    console.log('here handleDrawerOpenChange', open);
     setShowFilterDrawer(!showFilterDrawer);
   };
 
@@ -177,9 +324,10 @@ export function RootTable({
           showTabFilters={showTabFilters}
           handleDrawerOpenChange={handleDrawerOpenChange}
           tabFilters={tabFilters}
+          handleTabChange={handleTabChange}
         />
         <Table
-          wrapperClassName="border border-border rounded-lg overflow-y-auto max-h-[526px] bg-white"
+          wrapperClassName="border border-border rounded-lg overflow-y-auto max-h-[526px] bg-white min-h-[320px]"
           className={cn('w-full', className)}
           {...other}
         >
@@ -230,9 +378,13 @@ export function RootTable({
                   return (
                     <TableCell
                       key={`cell_${col.accessorKey}_${colIndex}`}
-                      className="px-4 max-w-[200px] truncate"
+                      className={`px-4 max-w-[200px] truncate text-sm text-slate-800 relative ${col.type === 'select' && col?.option?.length ? '!overflow-visible' : ''}`}
                     >
-                      {value ?? '-'}
+                      <CellRenderer
+                        value={value}
+                        type={col.type}
+                        options={col.option || []}
+                      />
                     </TableCell>
                   );
                 })}

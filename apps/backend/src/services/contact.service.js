@@ -2,17 +2,9 @@ const { PrismaClient } = require('@workspace/database/backend-prisma-client');
 const prisma = new PrismaClient();
 const { ValidationErrors, NotFound } = require('../exceptions');
 
-const fetchAll = async ({ skip, take, record, stage, search }) => {
+const fetchAll = async ({ skip, take, record, stage, search, userType }) => {
   try {
     const where = {};
-
-    if (record) {
-      where.record = record;
-    }
-
-    if (stage) {
-      where.stage = stage;
-    }
 
     if (search) {
       where.OR = [
@@ -22,33 +14,61 @@ const fetchAll = async ({ skip, take, record, stage, search }) => {
       ];
     }
 
-    const [contacts, total] = await Promise.all([
-      prisma.contact.findMany({
+    if (userType) {
+      where.userType = userType;
+    }
+
+    const [users, total] = await Promise.all([
+      prisma.user.findMany({
         where,
         skip,
         take,
         orderBy: { createdAt: 'desc' },
         include: {
-          organization: {
-            select: {
-              id: true,
-              name: true,
+          ownedTheses: true,
+          founderProfile: {
+            include: {
+              startup: {
+                select: {
+                  id: true,
+                  name: true,
+                  stage: true,
+                  industry: true,
+                  domains: true,
+                  website: true,
+                  startupIndustryDomain: true,
+                  thesisId: true,
+                  thesisName: true,
+                },
+              },
             },
           },
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
-          },
-          tags: true,
         },
+        // include: {
+        //   user: {
+        //     select: {
+        //       id: true,
+        //       name: true,
+        //       email: true,
+        //       ownedTheses: true,
+        //       userType: true,
+        //     },
+        //   },
+        //   tags: true,
+        // },
       }),
-      prisma.contact.count({ where }),
+      prisma.user.count({ where }),
     ]);
 
-    return { data: contacts, total };
+    const EXCLUDED_FIELDS = ['password', 'authId'];
+
+    const sanitizeUser = (user) => {
+      const sanitized = { ...user };
+      EXCLUDED_FIELDS.forEach((field) => delete sanitized[field]);
+      return sanitized;
+    };
+
+    return { data: users.map(sanitizeUser), total };
   } catch (error) {
     throw new Error(`Error fetching contacts: ${error.message}`);
   }

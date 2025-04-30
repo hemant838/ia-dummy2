@@ -16,15 +16,19 @@ import { apiClient } from '../../../../packages/api-client/src/api-client';
 
 export async function getAllContacts(
   page: number = 1,
-  pageSize: number = 8
+  pageSize: number = 8,
+  userType: string = ''
 ): Promise<string | undefined> {
   try {
-    const data: any = await apiClient(
-      `/contact?page=${page}&pageSize=${pageSize}`,
-      {
-        method: 'GET'
-      }
-    );
+    let url = `/contact?page=${page}&pageSize=${pageSize}`;
+
+    if (userType) {
+      url = url + `&userType=${userType}`;
+    }
+
+    const data: any = await apiClient(url, {
+      method: 'GET'
+    });
 
     if (!data?.status) {
       throw new NotFoundError('Something went wrong');

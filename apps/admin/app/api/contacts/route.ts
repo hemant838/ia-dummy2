@@ -7,9 +7,10 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const page = parseInt(searchParams.get('page') || '1', 10);
   const pageSize = parseInt(searchParams.get('pageSize') || '8', 10);
+  const userType = searchParams.get('userType') || '';
 
   try {
-    const data = await getAllContacts(page, pageSize);
+    const data = await getAllContacts(page, pageSize, userType);
     return NextResponse.json({ success: true, data });
   } catch (error) {
     console.error(error);

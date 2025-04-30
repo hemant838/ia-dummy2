@@ -60,11 +60,24 @@ register = async (payload) => {
 
   const hashedPassword = await bcrypt.hash(payload.password, 10);
 
+  // Check if an organization exists
+  let organization = await prisma.organization.findFirst();
+  if (!organization) {
+    // Create a new organization if none exists
+    organization = await prisma.organization.create({
+      data: {
+        name: 'Default',
+        stripeCustomerId: '8112fb21-1a94-47a2-8624-21cae9a467ba',
+      },
+    });
+  }
+
   const newUser = await prisma.user.create({
     data: {
       name: payload.name,
       email: payload.email,
       password: hashedPassword,
+      organizationId: organization.id,
     },
   });
 

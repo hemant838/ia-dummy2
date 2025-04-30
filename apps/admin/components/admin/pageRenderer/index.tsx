@@ -115,7 +115,8 @@ const PageRenderer = ({
   },
   apiEndpoint = '/',
   showTabFilters = false,
-  tabFilters = []
+  tabFilters = [],
+  tabFilterByKey = ''
 }: any): React.JSX.Element => {
   const [tableRowData, setTableRowData] = React.useState<any[]>(
     initialData?.tableRowData
@@ -124,11 +125,17 @@ const PageRenderer = ({
   const [currentPage, setCurrentPage] = React.useState<number>(1);
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
-  const fetchTableData = async (page: number) => {
+  const fetchTableData = async (page: number, filterByValue?: string) => {
     try {
       setIsLoading(true);
 
-      const res = await fetch(`/api/${apiEndpoint}?page=${page}`);
+      let url = `/api/${apiEndpoint}?page=${page}`;
+
+      if (tabFilterByKey && filterByValue && filterByValue !== 'all') {
+        url = url + `&${tabFilterByKey}=${filterByValue}`;
+      }
+
+      const res = await fetch(url);
 
       const json: any = await res.json();
 
@@ -174,6 +181,9 @@ const PageRenderer = ({
           fetchTableData(prevPage);
         }}
         tabFilters={tabFilters}
+        handleTabChange={(val: string) => {
+          fetchTableData(currentPage, val);
+        }}
       />
     </div>
   );

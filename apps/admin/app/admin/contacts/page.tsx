@@ -2,7 +2,7 @@ import * as React from 'react';
 import { type Metadata } from 'next';
 import { LogIn } from 'lucide-react';
 
-// import { getJWTToken } from '@workspace/auth/jwtAccessToken';
+import { getJWTToken } from '@workspace/auth/jwtAccessToken';
 import { APP_NAME } from '@workspace/common/app';
 import { routes } from '@workspace/routes';
 
@@ -20,22 +20,27 @@ export default async function ContactsPage(): Promise<React.JSX.Element> {
       pageName="contacts"
       apiEndpoint="contacts"
       showTabFilters={true}
+      tabFilterByKey="userType"
       tabFilters={[
         {
+          label: 'All',
+          value: 'all'
+        },
+        {
           label: 'Founders',
-          value: 'founder'
+          value: 'FOUNDER'
         },
         {
           label: 'Mentors',
-          value: 'mentors'
+          value: 'MENTOR'
         },
         {
           label: 'Corporate Partners',
-          value: 'corporate_partners'
+          value: 'INVESTOR'
         },
         {
           label: 'Our People',
-          value: 'our_people'
+          value: 'STAFF'
         }
       ]}
       tableColumn={[
@@ -45,19 +50,23 @@ export default async function ContactsPage(): Promise<React.JSX.Element> {
         },
         {
           label: 'Thesis',
-          accessorKey: 'program.name'
+          accessorKey: 'founderProfile.startup.thesisName',
+          type: 'tag'
         },
         {
           label: 'Email',
-          accessorKey: 'email'
+          accessorKey: 'email',
+          type: 'email'
         },
         {
           label: 'Domain',
-          accessorKey: 'evaluationStage'
+          accessorKey: 'founderProfile.startup.website',
+          type: 'url'
         },
         {
           label: 'Contact number',
-          accessorKey: 'phone'
+          accessorKey: 'phone',
+          type: 'phone'
         }
       ]}
     />
