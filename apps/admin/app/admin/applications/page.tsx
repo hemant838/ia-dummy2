@@ -102,11 +102,11 @@ export default async function ApplicationsPage(): Promise<React.JSX.Element> {
         {
           label: 'Startup source',
           accessorKey: 'startup.startupSource',
-          type: 'tag'
+          type: 'icon-tag'
         },
         {
           label: 'Referred by',
-          accessorKey: 'startup.referredById',
+          accessorKey: 'startup.referredBy.name',
           type: 'avatar'
         },
         {
@@ -152,7 +152,7 @@ export default async function ApplicationsPage(): Promise<React.JSX.Element> {
         {
           label: 'POC',
           accessorKey: 'startup.poc',
-          type: 'avatar'
+          type: 'text'
         },
         {
           label: 'Follow on Funding Ready',
@@ -161,7 +161,7 @@ export default async function ApplicationsPage(): Promise<React.JSX.Element> {
         },
         {
           label: 'Vertical partner',
-          accessorKey: 'startup.verticalPartnerId',
+          accessorKey: 'startup.verticalPartnerName',
           type: 'avatar'
         },
         {

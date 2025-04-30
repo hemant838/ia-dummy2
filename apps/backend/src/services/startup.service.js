@@ -131,8 +131,42 @@ const create = async (data) => {
       );
     }
 
+    // Fetch thesisName if thesisId is provided and thesisName is not
+    let resolvedThesisName = data.thesisName;
+    if (data.thesisId && !data.thesisName) {
+      const thesis = await prisma.thesis.findUnique({
+        where: { id: data.thesisId },
+      });
+      if (!thesis) {
+        throw new ValidationErrors(
+          null,
+          `Thesis with ID ${data.thesisId} not found`,
+        );
+      }
+      resolvedThesisName = thesis.name;
+    }
+
+    // Fetch verticalPartnerName if verticalPartnerId is provided and verticalPartnerName is not
+    let resolvedVerticalPartnerName = data.verticalPartnerName;
+    if (data.verticalPartnerId && !data.verticalPartnerName) {
+      const verticalPartner = await prisma.user.findUnique({
+        where: { id: data.verticalPartnerId },
+      });
+      if (!verticalPartner) {
+        throw new ValidationErrors(
+          null,
+          `Vertical Partner with ID ${data.verticalPartnerId} not found`,
+        );
+      }
+      resolvedVerticalPartnerName = verticalPartner.name;
+    }
+
     return prisma.startup.create({
-      data,
+      data: {
+        ...data,
+        thesisName: resolvedThesisName,
+        verticalPartnerName: resolvedVerticalPartnerName,
+      },
       include: {
         founders: true,
         thesis: true,

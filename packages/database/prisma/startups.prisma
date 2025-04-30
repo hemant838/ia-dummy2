@@ -150,6 +150,28 @@ enum MetricType {
   BURN
 }
 
+enum StartupSource {
+  CAMPUS_INSTITUTE
+  CORE_TEAM
+  MENTORS
+  PEER_FOUNDERS
+  LINKEDIN
+  COWORKING
+  WEBSITE_INBOUND
+  EVENTS
+  APPLICATION_FORM
+  TRAXCN
+  OTHERS
+  NO_SOURCE
+}
+
+enum StartupType {
+  PORTFOLIO_COMPANY
+  COWORKING
+  EXTERNAL_CLIENT
+  FUNDING_APPLICANT
+}
+
 // ---- Models ---- //
 
 model Account {
@@ -563,10 +585,10 @@ model Startup {
   employeeCount                    Int?
   evaluationStage                  String?
   startupIndustryDomain            String?
-  investmentType                   String?
-  startupSource                    String?
+  investmentType                   InvestmentType?
+  startupSource                    StartupSource?
   referredById                     String?
-  type                             String?
+  type                             StartupType?
   startupPriority                  String?
   dataRoomGDriveLinkPrimary        String?
   dataRoomGDriveLinkPrimaryLabel   String?

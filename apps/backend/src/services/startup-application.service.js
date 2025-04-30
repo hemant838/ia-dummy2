@@ -35,7 +35,8 @@ const fetchAll = async ({
         include: {
           startup: {
             include: {
-              thesis: true, // 👈 Include the nested `thesis` relation inside `startup`
+              thesis: true,
+              verticalPartner: true,
             },
           },
           program: true,
@@ -50,7 +51,32 @@ const fetchAll = async ({
       prisma.startupApplication.count({ where }),
     ]);
 
-    return { data, total };
+    // Collect all referredByIds
+    const referredByIds = data
+      .map((application) => application.startup?.referredById)
+      .filter((id) => id);
+
+    // Fetch all referredBy users in a single query
+    const referredByUsers = await prisma.user.findMany({
+      where: { id: { in: referredByIds } },
+    });
+
+    // Map referredBy users by ID
+    const referredByMap = referredByUsers.reduce((acc, user) => {
+      acc[user.id] = user;
+      return acc;
+    }, {});
+
+    // Enrich data with referredBy users
+    const enrichedData = data.map((application) => ({
+      ...application,
+      startup: {
+        ...application.startup,
+        referredBy: referredByMap[application.startup?.referredById] || null,
+      },
+    }));
+
+    return { data: enrichedData, total };
   } catch (error) {
     throw new Error(`Error fetching startup applications: ${error.message}`);
   }

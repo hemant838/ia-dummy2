@@ -31,7 +31,64 @@ export default async function CompaniesPage(): Promise<React.JSX.Element> {
         {
           label: 'Evaluation stages',
           accessorKey: 'evaluationStage',
-          type: 'tag'
+          type: 'select',
+          option: [
+            {
+              label: 'Application received',
+              value: 'application_received',
+              color: { bg: 'bg-green-50', border: 'border-green-100' }
+            },
+            {
+              label: 'L1',
+              value: 'L1',
+              color: { bg: 'bg-cyan-50', border: 'border-cyan-100' }
+            },
+            {
+              label: 'L2',
+              value: 'L2',
+              color: { bg: 'bg-yellow-50', border: 'border-yellow-100' }
+            },
+            {
+              label: 'L2.5',
+              value: 'L2.5',
+              color: { bg: 'bg-orange-50', border: 'border-orange-100' }
+            },
+            {
+              label: 'L3',
+              value: 'L3',
+              color: { bg: 'bg-lime-50', border: 'border-lime-100' }
+            },
+            {
+              label: 'L4',
+              value: 'L4',
+              color: { bg: 'bg-red-50', border: 'border-red-100' }
+            },
+            {
+              label: 'Investment completed',
+              value: 'investment_completed',
+              color: { bg: 'bg-lime-50', border: 'border-lime-100' }
+            },
+            {
+              label: 'On hold',
+              value: 'on_hold',
+              color: { bg: 'bg-purple-50', border: 'border-purple-100' }
+            },
+            {
+              label: 'Dropped',
+              value: 'dropped',
+              color: { bg: 'bg-orange-50', border: 'border-orange-100' }
+            },
+            {
+              label: 'No value',
+              value: 'no_value',
+              color: { bg: 'bg-gray-50', border: 'border-gray-100' }
+            },
+            {
+              label: 'Rejected',
+              value: 'rejected',
+              color: { bg: 'bg-red-50', border: 'border-red-100' }
+            }
+          ]
         },
         {
           label: 'Investment type',
@@ -96,7 +153,7 @@ export default async function CompaniesPage(): Promise<React.JSX.Element> {
         {
           label: 'POC',
           accessorKey: 'poc',
-          type: 'avatar'
+          type: 'text'
         },
         {
           label: 'Follow on Funding Ready',
@@ -106,7 +163,7 @@ export default async function CompaniesPage(): Promise<React.JSX.Element> {
         {
           label: 'Vertical partner',
           accessorKey: 'verticalPartnerId',
-          type: 'avatar'
+          type: 'text'
         },
         {
           label: 'Creation date',
@@ -116,7 +173,7 @@ export default async function CompaniesPage(): Promise<React.JSX.Element> {
         {
           label: 'Created by',
           accessorKey: 'createdBy',
-          type: 'avatar'
+          type: 'text'
         },
         {
           label: 'Notes',
@@ -141,7 +198,7 @@ export default async function CompaniesPage(): Promise<React.JSX.Element> {
         {
           label: 'Founders',
           accessorKey: 'founders',
-          type: 'avatar'
+          type: 'text'
         },
         {
           label: 'Legal Name',

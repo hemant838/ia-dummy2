@@ -32,3 +32,20 @@ export function getNestedValue(obj: any, path: string): any {
       obj
     );
 }
+
+export function getInitials(name: string): string {
+  console.log('here', name);
+  if (!name) return '';
+
+  const parts = name?.trim()?.split(/\s+/);
+
+  if (parts.length === 1) {
+    return parts[0].charAt(0).toUpperCase();
+  }
+
+  // Take first letter of first and last words
+  return (
+    parts[0].charAt(0).toUpperCase() +
+    parts[parts.length - 1].charAt(0).toUpperCase()
+  );
+}

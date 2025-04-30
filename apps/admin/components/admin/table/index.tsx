@@ -2,7 +2,13 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { Copy, EllipsisVertical, ExternalLink, Filter } from 'lucide-react';
+import {
+  Copy,
+  EllipsisVertical,
+  ExternalLink,
+  Filter,
+  GraduationCap
+} from 'lucide-react';
 
 import { Button } from '@workspace/ui/components/button';
 import {
@@ -36,7 +42,7 @@ import SideDrawer from '~/components/admin/SideDrawer';
 import TabList from '~/components/admin/tabs';
 import { useZodForm } from '~/hooks/use-zod-form';
 import { getRandomTagColor } from '~/lib/generate-random-tag-color';
-import { copyToClipboard, getNestedValue } from '~/lib/helper';
+import { copyToClipboard, getInitials, getNestedValue } from '~/lib/helper';
 import {
   programFilterSchema,
   type ProgramFilterSchema
@@ -136,6 +142,31 @@ function CellRenderer({ value, type = 'text', options = [] }: any) {
         >
           {value}
         </span>
+      );
+    }
+    case 'icon-tag': {
+      return (
+        <div
+          className={`px-2 py-1 flex items-center gap-x-1 bg-gray-50 text-gray-500 rounded-[6px]`}
+        >
+          <GraduationCap
+            size={16}
+            className="text-cyan-500"
+          />
+          <span className="lowercase">{value}</span>
+        </div>
+      );
+    }
+    case 'avatar': {
+      return (
+        <div
+          className={`py-1 flex items-center gap-x-1 bg-transparent text-gray-500 rounded-[6px]`}
+        >
+          <div className="rounded-full bg-green-50 font-medium text-green-400 p-2 h-6 w-6 flex justify-center items-center">
+            <span className="uppercase">{getInitials(value)}</span>
+          </div>
+          <span className="capitalize">{value}</span>
+        </div>
       );
     }
     case 'email':
