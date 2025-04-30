@@ -49,7 +49,6 @@ export default async function DashboardLayout(
             ...ctx.session?.user
           }}
         />
-        {/* Set max-width so full-width tables can overflow horizontally correctly */}
         <SidebarInset
           id="skip"
           className="size-full gap-y-4 bg-gray-50 lg:[transition:max-width_0.2s_linear] lg:peer-data-[state=collapsed]:max-w-[calc(100svw-var(--sidebar-width-icon))] lg:peer-data-[state=expanded]:max-w-[calc(100svw-var(--sidebar-width))]"
@@ -58,10 +57,11 @@ export default async function DashboardLayout(
             <h1 className="text-2xl text-gray-700">Admin Dashboard</h1>
           </header>
 
-          <section className="relative w-full h-full p-3 space-y-3">
-            <Breadcrumb />
-
-            <div className="relative h-full w-full">{props.children}</div>
+          <section className="relative w-full h-[calc(100%-56px)] overflow-auto">
+            <div className="p-3 space-y-3">
+              <Breadcrumb />
+              <div className="relative">{props.children}</div>
+            </div>
           </section>
         </SidebarInset>
       </Providers>
