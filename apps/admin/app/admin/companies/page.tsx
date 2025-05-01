@@ -18,6 +18,7 @@ export default async function CompaniesPage(): Promise<React.JSX.Element> {
       pageName="companies"
       apiEndpoint="companies"
       showTabFilters={false}
+      readOnly={true}
       tableColumn={[
         {
           label: 'Startup',
@@ -35,7 +36,7 @@ export default async function CompaniesPage(): Promise<React.JSX.Element> {
           option: [
             {
               label: 'Application received',
-              value: 'application_received',
+              value: 'APPLICATION_RECEIVED',
               color: { bg: 'bg-green-50', border: 'border-green-100' }
             },
             {
@@ -65,22 +66,22 @@ export default async function CompaniesPage(): Promise<React.JSX.Element> {
             },
             {
               label: 'Investment completed',
-              value: 'investment_completed',
+              value: 'INVESTMENT_COMPLETED',
               color: { bg: 'bg-lime-50', border: 'border-lime-100' }
             },
             {
               label: 'On hold',
-              value: 'on_hold',
+              value: 'OH_HOLD',
               color: { bg: 'bg-purple-50', border: 'border-purple-100' }
             },
             {
               label: 'Dropped',
-              value: 'dropped',
+              value: 'DROPPED',
               color: { bg: 'bg-orange-50', border: 'border-orange-100' }
             },
             {
               label: 'No value',
-              value: 'no_value',
+              value: 'NO_VALUE',
               color: { bg: 'bg-gray-50', border: 'border-gray-100' }
             },
             {
@@ -93,7 +94,44 @@ export default async function CompaniesPage(): Promise<React.JSX.Element> {
         {
           label: 'Investment type',
           accessorKey: 'investmentType',
-          type: 'text'
+          type: 'text-tag',
+          option: [
+            {
+              label: 'Seed',
+              value: 'SEED',
+              color: { bg: 'bg-gray-50', border: 'border-0' }
+            },
+            {
+              label: 'Series A',
+              value: 'SERIES_A',
+              color: { bg: 'bg-gray-50', border: 'border-0' }
+            },
+            {
+              label: 'Series B',
+              value: 'SERIES_B',
+              color: { bg: 'bg-gray-50', border: 'border-0' }
+            },
+            {
+              label: 'Series C',
+              value: 'SERIES_C',
+              color: { bg: 'bg-gray-50', border: 'border-0' }
+            },
+            {
+              label: 'Angel',
+              value: 'ANGEL',
+              color: { bg: 'bg-gray-50', border: 'border-0' }
+            },
+            {
+              label: 'Convertible Note',
+              value: 'CONVERTIBLE_NOTE',
+              color: { bg: 'bg-gray-50', border: 'border-0' }
+            },
+            {
+              label: 'SAFE',
+              value: 'SAFE',
+              color: { bg: 'bg-gray-50', border: 'border-0' }
+            }
+          ]
         },
         {
           label: 'Domain/Industry',
@@ -103,22 +141,154 @@ export default async function CompaniesPage(): Promise<React.JSX.Element> {
         {
           label: 'Startup source',
           accessorKey: 'startupSource',
-          type: 'tag'
+          type: 'icon-tag',
+          option: [
+            {
+              label: 'Campus Institute',
+              value: 'CAMPUS_INSTITUTE',
+              color: { bg: 'bg-gray-50', border: 'border-0' }
+            },
+            {
+              label: 'Core Team',
+              value: 'CORE_TEAM',
+              color: { bg: 'bg-gray-50', border: 'border-0' }
+            },
+            {
+              label: 'Mentors',
+              value: 'MENTORS',
+              color: { bg: 'bg-gray-50', border: 'border-0' }
+            },
+            {
+              label: 'Peer Founders',
+              value: 'PEER_FOUNDERS',
+              color: { bg: 'bg-gray-50', border: 'border-0' }
+            },
+            ,
+            {
+              label: 'Linkedin',
+              value: 'LINKEDIN',
+              color: { bg: 'bg-gray-50', border: 'border-0' }
+            },
+            {
+              label: 'Co-working',
+              value: 'COWORKING',
+              color: { bg: 'bg-gray-50', border: 'border-0' }
+            },
+            {
+              label: 'Website inbound',
+              value: 'WEBSITE_INBOUND',
+              color: { bg: 'bg-gray-50', border: 'border-0' }
+            },
+            {
+              label: 'Events',
+              value: 'EVENTS',
+              color: { bg: 'bg-gray-50', border: 'border-0' }
+            },
+            {
+              label: 'Application form',
+              value: 'APPLICATION_FORM',
+              color: { bg: 'bg-gray-50', border: 'border-0' }
+            },
+            {
+              label: 'traxcn',
+              value: 'TRAXCN',
+              color: { bg: 'bg-gray-50', border: 'border-0' }
+            },
+            {
+              label: 'others',
+              value: 'OTHERS',
+              color: { bg: 'bg-gray-50', border: 'border-0' }
+            },
+            {
+              label: 'No source',
+              value: 'NO_SOURCE',
+              color: { bg: 'bg-gray-50', border: 'border-0' }
+            }
+          ]
         },
         {
           label: 'Referred by',
-          accessorKey: 'referredById',
+          accessorKey: 'referredBy.name',
           type: 'avatar'
         },
         {
           label: 'Startup stage',
           accessorKey: 'stage',
-          type: 'tag'
+          type: 'select',
+          option: [
+            {
+              label: 'Idea',
+              value: 'IDEA',
+              color: { bg: 'bg-gray-50', border: 'border-gray-100' }
+            },
+            {
+              label: 'MVP',
+              value: 'MVP',
+              color: { bg: 'bg-yellow-50', border: 'border-yellow-100' }
+            },
+            {
+              label: 'Early Traction',
+              value: 'EARLY_TRACTION',
+              color: { bg: 'bg-green-50', border: 'border-green-100' }
+            },
+            {
+              label: 'Scaling',
+              value: 'SCALING',
+              color: { bg: 'bg-blue-50', border: 'border-blue-100' }
+            },
+            {
+              label: 'Acceleration',
+              value: 'ACCELERATION',
+              color: { bg: 'bg-purple-50', border: 'border-purple-100' }
+            },
+            {
+              label: 'Growth',
+              value: 'GROWTH',
+              color: { bg: 'bg-cyan-50', border: 'border-cyan-100' }
+            },
+            {
+              label: 'PMF',
+              value: 'PMF',
+              color: { bg: 'bg-orange-50', border: 'border-orange-100' }
+            },
+            {
+              label: 'Pre Product',
+              value: 'PRE_PRODUCT',
+              color: { bg: 'bg-lime-50', border: 'border-lime-100' }
+            },
+            {
+              label: 'Pre Revenue',
+              value: 'PRE_REVENUE',
+              color: { bg: 'bg-red-50', border: 'border-red-100' }
+            }
+          ]
         },
         {
           label: 'Type',
           accessorKey: 'type',
-          type: 'text'
+          type: 'text-tag',
+          option: [
+            {
+              label: 'Portfolio Company',
+              value: 'PORTFOLIO_COMPANY',
+              color: { bg: 'bg-gray-50', border: 'border-0' }
+            },
+            {
+              label: 'Co-working',
+              value: 'COWORKING',
+              color: { bg: 'bg-gray-50', border: 'border-0' }
+            },
+            {
+              label: 'External Client',
+              value: 'EXTERNAL_CLIENT',
+              color: { bg: 'bg-gray-50', border: 'border-0' }
+            },
+            {
+              label: 'Funding Applicant',
+              value: 'FUNDING_APPLICANT',
+              color: { bg: 'bg-gray-50', border: 'border-0' }
+            }
+          ]
         },
         {
           label: 'About company',
@@ -153,17 +323,41 @@ export default async function CompaniesPage(): Promise<React.JSX.Element> {
         {
           label: 'POC',
           accessorKey: 'poc',
-          type: 'text'
+          type: 'boolean',
+          option: [
+            {
+              label: 'True',
+              value: true,
+              color: { bg: 'bg-gray-50', border: 'border-0' }
+            },
+            {
+              label: 'False',
+              value: false,
+              color: { bg: 'bg-gray-50', border: 'border-0' }
+            }
+          ]
         },
         {
           label: 'Follow on Funding Ready',
           accessorKey: 'followOnFundingReady',
-          type: 'text'
+          type: 'boolean',
+          option: [
+            {
+              label: 'True',
+              value: true,
+              color: { bg: 'bg-gray-50', border: 'border-0' }
+            },
+            {
+              label: 'False',
+              value: false,
+              color: { bg: 'bg-gray-50', border: 'border-0' }
+            }
+          ]
         },
         {
           label: 'Vertical partner',
-          accessorKey: 'verticalPartnerId',
-          type: 'text'
+          accessorKey: 'verticalPartnerName',
+          type: 'avatar'
         },
         {
           label: 'Creation date',
@@ -173,7 +367,7 @@ export default async function CompaniesPage(): Promise<React.JSX.Element> {
         {
           label: 'Created by',
           accessorKey: 'createdBy',
-          type: 'text'
+          type: 'avatar'
         },
         {
           label: 'Notes',
@@ -198,7 +392,7 @@ export default async function CompaniesPage(): Promise<React.JSX.Element> {
         {
           label: 'Founders',
           accessorKey: 'founders',
-          type: 'text'
+          type: 'avatar'
         },
         {
           label: 'Legal Name',

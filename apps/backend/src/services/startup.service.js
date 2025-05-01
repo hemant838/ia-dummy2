@@ -42,7 +42,29 @@ const fetchAll = async ({ skip, take, stage, search }) => {
       prisma.startup.count({ where }),
     ]);
 
-    return { data: startups, total };
+    // Collect all referredByIds
+    const referredByIds = startups
+      .map((startup) => startup?.referredById)
+      .filter((id) => id);
+
+    // Fetch all referredBy users in a single query
+    const referredByUsers = await prisma.user.findMany({
+      where: { id: { in: referredByIds } },
+    });
+
+    // Map referredBy users by ID
+    const referredByMap = referredByUsers.reduce((acc, user) => {
+      acc[user.id] = user;
+      return acc;
+    }, {});
+
+    // Enrich data with referredBy users
+    const enrichedData = startups.map((startup) => ({
+      ...startup,
+      referredBy: referredByMap[startup?.referredById] || null,
+    }));
+
+    return { data: enrichedData, total };
   } catch (error) {
     throw new Error(`Error fetching startups: ${error.message}`);
   }

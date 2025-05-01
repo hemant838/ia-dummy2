@@ -63,3 +63,13 @@ export function formatDate(dateString: string): string {
 
   return format(date, 'M/d/yy'); // Formatting the date to "M/d/yy"
 }
+
+export function convertDateToISO(dateString: string) {
+  const date = new Date(dateString);
+  return date.toISOString();
+}
+
+export function convertISOToDateString(isoString: string) {
+  const date = new Date(isoString);
+  return date.toString();
+}

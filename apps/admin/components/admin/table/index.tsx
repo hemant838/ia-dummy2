@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 
 import { Button } from '@workspace/ui/components/button';
+import { Calendar } from '@workspace/ui/components/calendar';
 import {
   FormControl,
   FormField,
@@ -20,6 +21,11 @@ import {
   FormProvider
 } from '@workspace/ui/components/form';
 import { MultiSelect } from '@workspace/ui/components/multi-select';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger
+} from '@workspace/ui/components/popover';
 import {
   Select,
   SelectContent,
@@ -41,6 +47,11 @@ import { SearchableSelect } from '~/components/admin/form';
 import SideDrawer from '~/components/admin/SideDrawer';
 import TabList from '~/components/admin/tabs';
 import { useZodForm } from '~/hooks/use-zod-form';
+import {
+  convertDateToISO,
+  convertISOToDateString,
+  formatDate
+} from '~/lib/formatters';
 import { getRandomTagColor } from '~/lib/generate-random-tag-color';
 import { copyToClipboard, getInitials, getNestedValue } from '~/lib/helper';
 import {
@@ -49,7 +60,72 @@ import {
 } from '~/schemas/filter/program-filter-schema';
 import { TableFilter as TableFilterType } from '~/types/table';
 
-const CellSelect = ({ options = [], value }: any) => {
+function getLabelFromValue(value: string, options: any[]): string | undefined {
+  const match = options?.find((option) => option?.value === value);
+  return match?.label;
+}
+
+const CellDate = ({ value, handleFormSubmit, readOnly }: any) => {
+  const [selectedDate, setSelectedDate] = React.useState<Date | any>(
+    value ? new Date(value) : null
+  );
+  const [showDatePicker, setShowDatePicker] = React.useState(false);
+
+  const handleDateChange = (date: Date | any) => {
+    const formatedDate = convertDateToISO(date);
+
+    handleFormSubmit(formatedDate);
+
+    setSelectedDate(formatedDate);
+    setShowDatePicker(false); // Close the date picker after selection
+  };
+
+  return (
+    <div className="relative">
+      <Popover
+        open={showDatePicker}
+        onOpenChange={(val) => {
+          if (!readOnly) {
+            setShowDatePicker(val);
+          }
+        }}
+      >
+        <PopoverTrigger asChild>
+          <Button
+            variant="ghost"
+            className="bg-transparent hover:bg-gray-50 px-2 py-1 w-full h-fit justify-start"
+          >
+            <span className={`text-gray-500 rounded-[6px]`}>
+              {selectedDate ? formatDate(selectedDate) : 'Select Date'}
+            </span>
+          </Button>
+        </PopoverTrigger>
+
+        <PopoverContent
+          align="center"
+          className={`w-full min-w-[180px] bg-white shadow-lg border border-gray-100 rounded-lg px-2 py-1 text-xs`}
+        >
+          <Calendar
+            mode="single"
+            selected={new Date(convertISOToDateString(selectedDate))}
+            defaultMonth={new Date()}
+            onSelect={handleDateChange}
+            classNames={{
+              day_selected: `!bg-indigo-400 !border-indigo-500 !text-white !font-medium` // Highlight the selected day
+            }}
+          />
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+};
+
+const CellSelect = ({
+  options = [],
+  value,
+  handleFormSubmit,
+  readOnly
+}: any) => {
   const [showDropdown, setShowDropdown] = React.useState(false);
   const [cellValue, setCellValue] = React.useState(value);
   const [selectedColors, setSelectedColors] = React.useState<any>({
@@ -58,51 +134,233 @@ const CellSelect = ({ options = [], value }: any) => {
   });
 
   React.useEffect(() => {
-    const color = options.find((opt: any) => opt.value === value)?.color;
+    const color = options?.find((opt: any) => opt?.value === value)?.color;
     setSelectedColors(color);
   }, []);
 
   return (
     <div className="relative">
-      <Button
-        variant="ghost"
-        className="hover:bg-transparent px-0 py-0"
-        onClick={() => {
-          setShowDropdown(!showDropdown);
+      <Popover
+        open={showDropdown}
+        onOpenChange={(val) => {
+          if (!readOnly) {
+            setShowDropdown(val);
+          }
         }}
       >
-        <span
-          className={`px-2 py-1 border ${selectedColors.bg} ${selectedColors.border} text-gray-500 rounded-[6px]`}
+        <PopoverTrigger asChild>
+          <Button
+            variant="ghost"
+            className="hover:bg-transparent px-0 py-0 w-full justify-start"
+          >
+            <div
+              className={`capitalize min-h-[30px] min-w-[30px] px-2 py-1 border ${selectedColors?.bg} ${selectedColors?.border} text-gray-500 rounded-[6px]`}
+            >
+              <span>{cellValue || '-'}</span>
+            </div>
+          </Button>
+        </PopoverTrigger>
+
+        <PopoverContent
+          align="center"
+          className={`w-full min-w-[180px] bg-white shadow-lg border border-gray-100 rounded-lg px-2 py-1 text-xs`}
         >
-          {cellValue}
-        </span>
-      </Button>
+          <SearchableSelect
+            data={options}
+            onSelectChange={(selected: any) => {
+              setCellValue(selected?.label);
+              if (selected?.color) {
+                setSelectedColors(selected?.color);
+              }
 
-      {showDropdown && (
-        <SearchableSelect
-          data={options}
-          onSelectChange={(selected: any) => {
-            setCellValue(selected?.label);
-            if (selected?.color) {
-              setSelectedColors(selected?.color);
-            }
-
-            setShowDropdown(false);
-          }}
-        />
-      )}
+              setShowDropdown(false);
+              handleFormSubmit(selected?.value);
+            }}
+          />
+        </PopoverContent>
+      </Popover>
     </div>
   );
 };
 
-function CellRenderer({ value, type = 'text', options = [] }: any) {
-  if (!value) {
-    return (
-      <div>
-        <span>-</span>
-      </div>
-    );
-  }
+const CellTagSelect = ({
+  options = [],
+  value,
+  handleFormSubmit,
+  readOnly
+}: any) => {
+  const [showDropdown, setShowDropdown] = React.useState(false);
+  const [cellValue, setCellValue] = React.useState(value);
+  const [selectedColors, setSelectedColors] = React.useState<any>({
+    bg: '',
+    border: ''
+  });
+
+  React.useEffect(() => {
+    const color = options?.find((opt: any) => opt?.value === value)?.color;
+    setSelectedColors(color);
+  }, []);
+
+  return (
+    <div className="relative">
+      <Popover
+        open={showDropdown}
+        onOpenChange={(val) => {
+          if (!readOnly) {
+            setShowDropdown(val);
+          }
+        }}
+      >
+        <PopoverTrigger asChild>
+          <Button
+            variant="ghost"
+            className={`max-h-[30px] flex px-2 py-1 w-fit ${!cellValue ? 'min-w-[80px]' : ''} justify-start items-center gap-x-1 bg-gray-50 text-gray-500 hover:text-gray-500 font-normal hover:font-normal rounded-[6px]`}
+          >
+            <GraduationCap
+              size={16}
+              className="text-cyan-500"
+            />
+            <span className="capitalize">{cellValue || '-'}</span>
+          </Button>
+        </PopoverTrigger>
+
+        <PopoverContent
+          align="center"
+          className={`w-full min-w-[180px] bg-white shadow-lg border border-gray-100 rounded-lg px-2 py-1 text-xs`}
+        >
+          <SearchableSelect
+            data={options}
+            onSelectChange={(selected: any) => {
+              setCellValue(selected?.label);
+              if (selected?.color) {
+                setSelectedColors(selected?.color);
+              }
+
+              handleFormSubmit(selected?.value);
+
+              setShowDropdown(false);
+            }}
+          />
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+};
+
+const CellTextSelect = ({
+  options = [],
+  value,
+  handleFormSubmit,
+  readOnly
+}: any) => {
+  const [showDropdown, setShowDropdown] = React.useState(false);
+  const [cellValue, setCellValue] = React.useState(value);
+
+  return (
+    <div className="relative">
+      <Popover
+        open={showDropdown}
+        onOpenChange={(val) => {
+          if (!readOnly) {
+            setShowDropdown(val);
+          }
+        }}
+      >
+        <PopoverTrigger asChild>
+          <Button
+            variant="ghost"
+            className={`max-h-[30px] w-full bg-transparent hover:bg-transparent flex justify-start items-center`}
+          >
+            <div
+              className={`h-full flex px-1 py-0 w-fit justify-start items-center bg-transparent hover:bg-gray-50 text-gray-500 hover:text-gray-500 font-normal hover:font-normal rounded-[6px]`}
+            >
+              <span className="text-slate-800 capitalize">{cellValue}</span>
+            </div>
+          </Button>
+        </PopoverTrigger>
+
+        <PopoverContent
+          align="center"
+          className={`w-full min-w-[180px] bg-white shadow-lg border border-gray-100 rounded-lg px-2 py-1 text-xs`}
+        >
+          <SearchableSelect
+            data={options}
+            onSelectChange={(selected: any) => {
+              setCellValue(selected?.label);
+
+              handleFormSubmit(selected?.value);
+
+              setShowDropdown(false);
+            }}
+          />
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+};
+
+const CellBooleanSelect = ({
+  options = [],
+  value,
+  handleFormSubmit,
+  readOnly
+}: any) => {
+  const [showDropdown, setShowDropdown] = React.useState(false);
+  const [cellValue, setCellValue] = React.useState(value);
+
+  return (
+    <div className="relative">
+      <Popover
+        open={showDropdown}
+        onOpenChange={(val) => {
+          if (!readOnly) {
+            setShowDropdown(val);
+          }
+        }}
+      >
+        <PopoverTrigger asChild>
+          <Button
+            variant="ghost"
+            className={`max-h-[30px] flex px-1 py-0 w-fit justify-start items-center bg-transparent hover:bg-gray-50 text-gray-500 hover:text-gray-500 font-normal hover:font-normal rounded-[6px]`}
+          >
+            <span className="text-slate-800 capitalize">{cellValue}</span>
+          </Button>
+        </PopoverTrigger>
+
+        <PopoverContent
+          align="center"
+          className={`w-full min-w-[180px] bg-white shadow-lg border border-gray-100 rounded-lg px-2 py-1 text-xs`}
+        >
+          <SearchableSelect
+            data={options}
+            onSelectChange={(selected: any) => {
+              setCellValue(selected?.label);
+
+              setShowDropdown(false);
+
+              handleFormSubmit(selected?.value);
+            }}
+          />
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+};
+
+function CellRenderer({
+  value,
+  type = 'text',
+  options = [],
+  handleFormSubmit,
+  readOnly = false
+}: any) {
+  // if (!value && typeof value !== 'boolean') {
+  //   return (
+  //     <div>
+  //       <span>-</span>
+  //     </div>
+  //   );
+  // }
 
   switch (type) {
     case 'input':
@@ -117,19 +375,19 @@ function CellRenderer({ value, type = 'text', options = [] }: any) {
       );
     case 'date':
       return (
-        <div>
-          <input
-            type="date"
-            defaultValue={value}
-            className="border p-1 rounded"
-          />
-        </div>
+        <CellDate
+          value={value}
+          handleFormSubmit={handleFormSubmit}
+          readOnly={readOnly}
+        />
       );
     case 'select': {
       return (
         <CellSelect
           options={options}
-          value={value}
+          value={getLabelFromValue(value, options)}
+          handleFormSubmit={handleFormSubmit}
+          readOnly={readOnly}
         />
       );
     }
@@ -137,33 +395,34 @@ function CellRenderer({ value, type = 'text', options = [] }: any) {
       const { bg, border } = React.useMemo(() => getRandomTagColor(), []);
 
       return (
-        <span
-          className={`px-2 py-1 ${bg} ${border} text-gray-500 rounded-[6px]`}
+        <div
+          className={`px-2 py-1 w-fit min-w-[30px] min-h-[30px] ${bg} ${border} text-gray-500 rounded-[6px]`}
         >
-          {value}
-        </span>
+          <span>{value}</span>
+        </div>
       );
     }
     case 'icon-tag': {
       return (
-        <div
-          className={`px-2 py-1 flex items-center gap-x-1 bg-gray-50 text-gray-500 rounded-[6px]`}
-        >
-          <GraduationCap
-            size={16}
-            className="text-cyan-500"
-          />
-          <span className="lowercase">{value}</span>
-        </div>
+        <CellTagSelect
+          options={options}
+          value={getLabelFromValue(value, options)}
+          handleFormSubmit={handleFormSubmit}
+          readOnly={readOnly}
+        />
       );
     }
     case 'avatar': {
+      if (!value) {
+        return <span className="capitalize text-gray-500">-</span>;
+      }
+
       return (
         <div
           className={`py-1 flex items-center gap-x-1 bg-transparent text-gray-500 rounded-[6px]`}
         >
           <div className="rounded-full bg-green-50 font-medium text-green-400 p-2 h-6 w-6 flex justify-center items-center">
-            <span className="uppercase">{getInitials(value)}</span>
+            <span className="uppercase">{getInitials(`${value}`)}</span>
           </div>
           <span className="capitalize">{value}</span>
         </div>
@@ -194,7 +453,11 @@ function CellRenderer({ value, type = 'text', options = [] }: any) {
           </Button>
         </div>
       );
-    case 'url':
+    case 'url': {
+      if (!value) {
+        return <span>-</span>;
+      }
+
       return (
         <div className="flex items-center gap-x-3">
           <Link
@@ -221,6 +484,7 @@ function CellRenderer({ value, type = 'text', options = [] }: any) {
           </Button>
         </div>
       );
+    }
     case 'phone':
       return (
         <div>
@@ -231,6 +495,24 @@ function CellRenderer({ value, type = 'text', options = [] }: any) {
             {value}
           </Link>
         </div>
+      );
+    case 'text-tag':
+      return (
+        <CellTextSelect
+          options={options}
+          value={getLabelFromValue(value, options)}
+          handleFormSubmit={handleFormSubmit}
+          readOnly={readOnly}
+        />
+      );
+    case 'boolean':
+      return (
+        <CellBooleanSelect
+          options={options}
+          value={value ? `${value}` : 'False'}
+          handleFormSubmit={handleFormSubmit}
+          readOnly={readOnly}
+        />
       );
     case 'text':
     default:
@@ -308,6 +590,8 @@ export function RootTable({
   handlePrevPage = () => {},
   tabFilters = [],
   handleTabChange = () => {},
+  handleFormSubmit = () => {},
+  readOnly = false,
   ...other
 }: TableFilterType): React.JSX.Element {
   const [showFilterDrawer, setShowFilterDrawer] =
@@ -331,7 +615,7 @@ export function RootTable({
 
   const canSubmit = !isLoading && !methods.formState.isSubmitting;
 
-  const onSubmit = async (values: ProgramFilterSchema): Promise<void> => {
+  const onFilterSubmit = async (values: ProgramFilterSchema): Promise<void> => {
     if (!canSubmit) {
       return;
     }
@@ -415,6 +699,10 @@ export function RootTable({
                         value={value}
                         type={col.type}
                         options={col.option || []}
+                        handleFormSubmit={(val: any) => {
+                          handleFormSubmit(val, col.accessorKey, item.id, item);
+                        }}
+                        readOnly={readOnly}
                       />
                     </TableCell>
                   );
@@ -478,7 +766,7 @@ export function RootTable({
         <FormProvider {...methods}>
           <form
             className="flex flex-col gap-5"
-            onSubmit={methods.handleSubmit(onSubmit)}
+            onSubmit={methods.handleSubmit(onFilterSubmit)}
           >
             {[
               {

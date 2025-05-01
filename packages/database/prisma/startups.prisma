@@ -123,6 +123,11 @@ enum EvaluationStage {
   L2_5
   L3
   L4
+  APPLICATION_RECEIVED
+  INVESTMENT_COMPLETED
+  OH_HOLD
+  DROPPED
+  NO_VALUE
 }
 
 enum EvaluationStatus {

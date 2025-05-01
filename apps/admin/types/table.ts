@@ -11,4 +11,6 @@ export type TableFilter = {
   handlePrevPage?: any;
   tabFilters?: Array<any>;
   handleTabChange?: any;
+  handleFormSubmit?: any;
+  readOnly?: boolean;
 };

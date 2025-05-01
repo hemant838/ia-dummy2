@@ -2,8 +2,8 @@ export function copyToClipboard(text: string) {
   if (navigator.clipboard) {
     navigator.clipboard
       .writeText(text)
-      .then(() => console.log('Copied to clipboard'))
-      .catch((err) => console.error('Failed to copy:', err));
+      .then(() => true)
+      .catch((err) => false);
   } else {
     // Fallback for older browsers
     const textarea = document.createElement('textarea');
@@ -15,12 +15,10 @@ export function copyToClipboard(text: string) {
 
     try {
       document.execCommand('copy');
-      console.log('Copied to clipboard');
+      return true;
     } catch (err) {
-      console.error('Fallback: Failed to copy', err);
+      return false;
     }
-
-    document.body.removeChild(textarea);
   }
 }
 
@@ -33,8 +31,7 @@ export function getNestedValue(obj: any, path: string): any {
     );
 }
 
-export function getInitials(name: string): string {
-  console.log('here', name);
+export function getInitials(name: string = ''): string {
   if (!name) return '';
 
   const parts = name?.trim()?.split(/\s+/);
