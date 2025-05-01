@@ -134,7 +134,11 @@ const CellSelect = ({
   });
 
   React.useEffect(() => {
-    const color = options?.find((opt: any) => opt?.value === value)?.color;
+    const color = options?.find(
+      (opt: any) =>
+        opt?.value?.toLowerCase() === value?.toLowerCase() ||
+        opt?.label?.toLowerCase() === value?.toLowerCase()
+    )?.color;
     setSelectedColors(color);
   }, []);
 
@@ -527,9 +531,13 @@ const TableFilter = ({
   handleTabChange = () => {}
 }: any): React.JSX.Element => {
   const [searchQuery, setSearchQuery] = React.useState<string>('');
-  const [status, setStatus] = React.useState<string>(
-    tabFilters[0]?.value || ''
-  );
+  const [status, setStatus] = React.useState<string>('');
+
+  React.useEffect(() => {
+    if (tabFilters?.length && !status) {
+      setStatus(tabFilters[0]?.value);
+    }
+  }, [tabFilters]);
 
   // const handleSearchQueryChange = (
   //   e: React.ChangeEvent<HTMLInputElement>
@@ -592,6 +600,7 @@ export function RootTable({
   handleTabChange = () => {},
   handleFormSubmit = () => {},
   readOnly = false,
+  colorHeader = false,
   ...other
 }: TableFilterType): React.JSX.Element {
   const [showFilterDrawer, setShowFilterDrawer] =
@@ -632,6 +641,16 @@ export function RootTable({
     setShowFilterDrawer(!showFilterDrawer);
   };
 
+  const columnColors = React.useMemo(() => {
+    return column.reduce(
+      (acc: Record<string, { bg: string; border: string }>, col) => {
+        acc[col.accessorKey] = getRandomTagColor();
+        return acc;
+      },
+      {}
+    );
+  }, [column]);
+
   return (
     <div className="w-full relative space-y-4">
       <div className="w-full space-y-3">
@@ -649,6 +668,8 @@ export function RootTable({
           <TableHeader className="sticky top-0 bg-gray-50 z-1 w-full">
             <TableRow className="border-b hover:bg-inherit bg-gray-50">
               {column.map((item: any, index: number) => {
+                const { bg, border } = columnColors[item.accessorKey] || {};
+
                 return (
                   <TableHead
                     key={`${item?.label}_${index}`}
@@ -657,7 +678,15 @@ export function RootTable({
                       index !== column.length - 1 ? 'border-r' : ''
                     )}
                   >
-                    {item?.label}
+                    <span
+                      className={cn(
+                        colorHeader
+                          ? `border rounded ${bg} ${border} px-2 py-1`
+                          : ''
+                      )}
+                    >
+                      {item?.label}
+                    </span>
                   </TableHead>
                 );
               })}

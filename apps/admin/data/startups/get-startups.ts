@@ -20,7 +20,7 @@ export async function getAllStartups(
 ): Promise<string | undefined> {
   try {
     const data: any = await apiClient(
-      `/startup?page=${page}&pageSize=${pageSize}`,
+      `/startup?page=${page}&pageSize=${pageSize}&evaluationStage=${'INVESTMENT_COMPLETED'}`,
       {
         method: 'GET'
       }

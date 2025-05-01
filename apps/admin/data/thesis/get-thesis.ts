@@ -133,3 +133,34 @@ export async function getAllThesis(
   //   // }
   // )();
 }
+
+export async function getThesisById(
+  id: number = 1
+): Promise<string | undefined> {
+  try {
+    const data: any = await apiClient(`/thesis/${id}`, {
+      method: 'GET'
+    });
+
+    if (!data?.status) {
+      throw new NotFoundError('Something went wrong');
+    }
+
+    let result = data.data;
+
+    const formattedData = {
+      ...result,
+      createdAt: formatDate(result?.createdAt),
+      updatedAt: formatDate(result?.updatedAt)
+    };
+
+    result = {
+      ...result,
+      data: formattedData
+    };
+
+    return result;
+  } catch (error) {
+    throw error;
+  }
+}

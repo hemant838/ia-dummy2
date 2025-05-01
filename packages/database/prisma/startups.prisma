@@ -127,6 +127,7 @@ enum EvaluationStage {
   INVESTMENT_COMPLETED
   OH_HOLD
   DROPPED
+  REJECTED
   NO_VALUE
 }
 

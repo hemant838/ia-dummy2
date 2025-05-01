@@ -13,4 +13,5 @@ export type TableFilter = {
   handleTabChange?: any;
   handleFormSubmit?: any;
   readOnly?: boolean;
+  colorHeader?: boolean;
 };

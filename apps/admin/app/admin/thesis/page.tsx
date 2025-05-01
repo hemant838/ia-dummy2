@@ -17,55 +17,65 @@ export default async function ThesisPage(): Promise<React.JSX.Element> {
       pageTitle="Thesis"
       pageName="thesis"
       apiEndpoint="thesis"
-      showTabFilters={false}
+      showTabFilters={true}
+      readOnly={true}
+      tabFilterByKey="id"
+      // tabFilters={} // this is managed inside PageRenderer
       tableColumn={[
         {
-          label: 'Thesis',
-          accessorKey: 'name'
-        },
-        {
           label: 'Application received',
-          accessorKey: 'program.name'
+          accessorKey: 'APPLICATION_RECEIVED.name',
+          type: 'avatar'
         },
         {
           label: 'L1',
-          accessorKey: 'l1'
+          accessorKey: 'L1.name',
+          type: 'avatar'
         },
         {
           label: 'L2',
-          accessorKey: 'evaluationStage'
+          accessorKey: 'L2.name',
+          type: 'avatar'
         },
         {
           label: 'L2.5',
-          accessorKey: 'startup.investmentType'
+          accessorKey: 'L2_5.name',
+          type: 'avatar'
         },
         {
           label: 'L3',
-          accessorKey: 'startup.startupIndustryDomain'
+          accessorKey: 'L3.name',
+          type: 'avatar'
         },
         {
           label: 'L4',
-          accessorKey: 'startup.startupSource'
+          accessorKey: 'L4.name',
+          type: 'avatar'
         },
         {
           label: 'Investment completed',
-          accessorKey: 'startup.referredById'
+          accessorKey: 'INVESTMENT_COMPLETED.name',
+          type: 'avatar'
         },
         {
           label: 'On hold',
-          accessorKey: 'startup.stage'
+          accessorKey: 'OH_HOLD.name',
+          type: 'avatar'
         },
         {
           label: 'Dropped',
-          accessorKey: 'startup.type'
+          accessorKey: 'DROPPED.name',
+          type: 'avatar'
         },
         {
           label: 'Rejected',
-          accessorKey: 'startup.description'
+          accessorKey: 'REJECTED.name',
+          type: 'avatar'
         },
         {
           label: 'No Value',
-          accessorKey: 'startup.dataRoomGDriveLinkPrimary'
+          accessorKey: 'NO_VALUE.name',
+          type: 'avatar'
         }
       ]}
     />

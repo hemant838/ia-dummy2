@@ -172,6 +172,41 @@ const PageRenderer = ({
   const [metaData, setMetaData] = React.useState<any>(initialData?.metaData);
   const [currentPage, setCurrentPage] = React.useState<number>(1);
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
+  const [tabFiltersOptions, setTabFiltersOptions] = React.useState<any>([]);
+
+  const fetchAllThesis = async () => {
+    let url = `/api/${apiEndpoint}`;
+
+    const res = await fetch(url);
+
+    const json: any = await res.json();
+
+    const data = json.data || {};
+
+    const filters = data.data.map((d: any) => {
+      return {
+        label: d.name,
+        value: d.id
+      };
+    });
+
+    setTabFiltersOptions(filters);
+
+    fetchTableData(currentPage, filters[0]?.value);
+  };
+
+  function formatStartupsForStageTable(startups: any, tableColumns: any) {
+    return startups.map((startup: any) => {
+      const row: any = {};
+
+      tableColumns.forEach((col: any) => {
+        const key = col.accessorKey.split('.')[0];
+        row[key] = key === startup.evaluationStage ? startup : null;
+      });
+
+      return row;
+    });
+  }
 
   const fetchTableData = async (page: number, filterByValue?: string) => {
     try {
@@ -179,20 +214,49 @@ const PageRenderer = ({
 
       let url = `/api/${apiEndpoint}?page=${page}`;
 
-      if (tabFilterByKey && filterByValue && filterByValue !== 'all') {
+      if (
+        tabFilterByKey &&
+        tabFilterByKey !== 'id' &&
+        filterByValue &&
+        filterByValue !== 'all'
+      ) {
         url = url + `&${tabFilterByKey}=${filterByValue}`;
+      }
+
+      if (
+        tabFilterByKey &&
+        tabFilterByKey === 'id' &&
+        filterByValue &&
+        filterByValue !== 'all'
+      ) {
+        url = `/api/${apiEndpoint}/` + `${filterByValue}`;
       }
 
       const res = await fetch(url);
 
       const json: any = await res.json();
-
-      console.log(`res ${pageName}`, json);
+      console.log('json', json);
 
       const data = json.data || {};
-      setTableRowData(data.data || []);
+
+      if (pageName === 'thesis') {
+        console.log(
+          'here thesis startups ####',
+          formatStartupsForStageTable(data.data.startups, tableColumn)
+        );
+        setTableRowData(
+          formatStartupsForStageTable(data.data.startups, tableColumn) || []
+        );
+      } else {
+        setTableRowData(data.data || []);
+      }
+
       setMetaData(data.meta || {});
       setCurrentPage(page);
+
+      if (pageName !== 'thesis') {
+        setTabFiltersOptions(tabFilters);
+      }
     } catch (error) {
       console.error(`Error fetching ${pageName}:`, error);
     } finally {
@@ -222,7 +286,15 @@ const PageRenderer = ({
   };
 
   React.useEffect(() => {
-    fetchTableData(currentPage); // Fetch initial data
+    if (pageName === 'thesis') {
+      fetchAllThesis();
+    }
+  }, [pageName]);
+
+  React.useEffect(() => {
+    if (pageName !== 'thesis') {
+      fetchTableData(currentPage); // Fetch initial data
+    }
   }, [pageName]);
 
   return (
@@ -244,13 +316,14 @@ const PageRenderer = ({
         hasPreviousPage={metaData?.hasPreviousPage}
         currentPage={currentPage}
         readOnly={readOnly}
+        colorHeader={pageName === 'thesis'}
         handleNextPage={(nextPage: number) => {
           fetchTableData(nextPage);
         }}
         handlePrevPage={(prevPage: number) => {
           fetchTableData(prevPage);
         }}
-        tabFilters={tabFilters}
+        tabFilters={tabFiltersOptions}
         handleTabChange={(val: string) => {
           fetchTableData(currentPage, val);
         }}

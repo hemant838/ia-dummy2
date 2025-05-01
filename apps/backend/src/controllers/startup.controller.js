@@ -7,13 +7,14 @@ const getAllStartups = async (req, res, next) => {
     const { page, pageSize, skip, take } = pagination.getPaginationParams(
       req.query,
     );
-    const { stage, search } = req.query;
+    const { stage, search, evaluationStage } = req.query;
 
     const { data, total } = await startupService.fetchAll({
       skip,
       take,
       stage,
       search,
+      evaluationStage,
     });
 
     const paginatedResponse = pagination.getPaginatedResponse(

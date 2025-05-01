@@ -2,7 +2,7 @@ const { PrismaClient } = require('@workspace/database/backend-prisma-client');
 const prisma = new PrismaClient();
 const { ValidationErrors, NotFound } = require('../exceptions');
 
-const fetchAll = async ({ skip, take, stage, search }) => {
+const fetchAll = async ({ skip, take, stage, search, evaluationStage }) => {
   try {
     const where = {};
 
@@ -15,6 +15,10 @@ const fetchAll = async ({ skip, take, stage, search }) => {
         { name: { contains: search, mode: 'insensitive' } },
         { description: { contains: search, mode: 'insensitive' } },
       ];
+    }
+
+    if (evaluationStage) {
+      where.evaluationStage = evaluationStage;
     }
 
     const [startups, total] = await Promise.all([
