@@ -19,17 +19,15 @@ export function getRedirectToSignIn(): string {
     : `${routes.dashboard.Api}/auth/signin`;
 }
 
-export async function getRedirectAfterSignIn(): Promise<string> {
+export async function getRedirectAfterSignIn(
+  redirectRoute: string
+): Promise<string> {
   // Try to retrieve cookie stored slug
   const cookieStore = await cookies();
   const callbackUrl = cookieStore.get(AuthCookies.CallbackUrl)?.value;
   // const slug = cookieStore.get('organizationSlug')?.value;
 
-  const redirectTo = callbackUrl
-    ? callbackUrl
-    : routes.dashboard.admin.routes.Index;
-
-  console.log('redirectTo', redirectTo);
+  const redirectTo = callbackUrl ? callbackUrl : redirectRoute;
 
   return redirectTo;
 }

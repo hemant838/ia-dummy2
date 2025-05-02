@@ -61,19 +61,19 @@ export const routes = {
       }
     },
     startup: {
-      Index: `${baseUrl.Dashboard}/admin`,
+      Index: `${baseUrl.Dashboard}/founder`,
       routes: {
-        Index: `${baseUrl.Dashboard}/admin/dashboard`,
+        Index: `${baseUrl.Dashboard}/founder/dashboard`,
         programs: {
-          Index: `${baseUrl.Dashboard}/admin/programs`,
+          Index: `${baseUrl.Dashboard}/founder/programs`,
           routes: {
-            CreateProgram: `${baseUrl.Dashboard}/admin/programs/create-program`
+            CreateProgram: `${baseUrl.Dashboard}/founder/programs/create-program`
           }
         },
-        Applications: `${baseUrl.Dashboard}/admin/applications`,
-        Thesis: `${baseUrl.Dashboard}/admin/thesis`,
-        Companies: `${baseUrl.Dashboard}/admin/companies`,
-        Contacts: `${baseUrl.Dashboard}/admin/contacts`
+        Applications: `${baseUrl.Dashboard}/founder/applications`,
+        Thesis: `${baseUrl.Dashboard}/founder/thesis`,
+        Companies: `${baseUrl.Dashboard}/founder/companies`,
+        Contacts: `${baseUrl.Dashboard}/founder/contacts`
       }
     },
     invitations: {

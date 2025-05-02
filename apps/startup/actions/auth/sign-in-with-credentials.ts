@@ -6,6 +6,7 @@ import { signIn } from '@workspace/auth';
 import { CredentialsSignin } from '@workspace/auth/errors';
 import { Provider } from '@workspace/auth/providers.types';
 import { getRedirectAfterSignIn } from '@workspace/auth/redirect';
+import { replaceOrgSlug, routes } from '@workspace/routes';
 
 import { actionClient } from '~/actions/safe-action';
 import { passThroughCredentialsSchema } from '~/schemas/auth/pass-through-credentials-schema';
@@ -14,7 +15,9 @@ export const signInWithCredentials = actionClient
   .metadata({ actionName: 'signInWithCredentials' })
   .schema(passThroughCredentialsSchema)
   .action(async ({ parsedInput }) => {
-    const redirectTo = await getRedirectAfterSignIn();
+    const redirectTo = await getRedirectAfterSignIn(
+      routes.dashboard.startup.routes.Index
+    );
 
     // Expected UX for log in is to pass the credentials through
     // and not validate them on the client-side.

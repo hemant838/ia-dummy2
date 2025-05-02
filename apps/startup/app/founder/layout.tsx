@@ -8,7 +8,7 @@ import { getRedirectToSignIn } from '@workspace/auth/redirect';
 import { routes } from '@workspace/routes';
 import { SidebarInset } from '@workspace/ui/components/sidebar';
 
-import Breadcrumb from '~/components/admin/breadcrumb';
+import Breadcrumb from '~/components/main/breadcrumb';
 import { SidebarRenderer } from '~/components/organizations/slug/sidebar-renderer';
 import { getOrganizations } from '~/data/organization/get-organizations';
 import { createTitle } from '~/lib/formatters';
@@ -54,12 +54,12 @@ export default async function DashboardLayout(
           className="size-full gap-y-4 bg-gray-50 lg:[transition:max-width_0.2s_linear] lg:peer-data-[state=collapsed]:max-w-[calc(100svw-var(--sidebar-width-icon))] lg:peer-data-[state=expanded]:max-w-[calc(100svw-var(--sidebar-width))]"
         >
           <header className="flex h-[56px] items-center justify-between bg-white p-4">
-            <h1 className="text-2xl text-gray-700">Admin Dashboard</h1>
+            <h1 className="text-2xl text-gray-700">Founder Dashboard</h1>
           </header>
 
           <section className="relative w-full h-[calc(100%-56px)] overflow-auto">
             <div className="p-3 space-y-3">
-              <Breadcrumb />
+              {/* <Breadcrumb /> */}
               <div className="relative">{props.children}</div>
             </div>
           </section>

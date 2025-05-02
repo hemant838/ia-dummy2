@@ -78,6 +78,8 @@ register = async (payload) => {
       email: payload.email,
       password: hashedPassword,
       organizationId: organization.id,
+      userType: payload.userType || 'GENERAL',
+      role: payload.role || 'MEMBER',
     },
   });
 

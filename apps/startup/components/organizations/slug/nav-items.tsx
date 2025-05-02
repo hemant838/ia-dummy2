@@ -2,17 +2,17 @@ import {
   BellIcon,
   CalendarHeart,
   CodeIcon,
-  Contact,
   CreditCardIcon,
+  Files,
   FileText,
   GraduationCap,
-  Hotel,
   LayoutGrid,
   LockKeyholeIcon,
-  SettingsIcon,
   StoreIcon,
+  UserCog,
   UserIcon,
-  UserPlus2Icon
+  UserPlus2Icon,
+  UserSearch
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -29,34 +29,39 @@ type NavItem = {
 export function createMainNavItems(slug: string): NavItem[] {
   return [
     {
-      title: 'Dashboard',
-      href: routes.dashboard.admin.routes.Index,
+      title: 'Profile',
+      href: routes.dashboard.startup.routes.Index,
       icon: LayoutGrid
     },
     {
       title: 'Programs',
-      href: routes.dashboard.admin.routes.programs.Index,
+      href: routes.dashboard.startup.routes.programs.Index,
       icon: CalendarHeart
     },
     {
       title: 'Applications',
-      href: routes.dashboard.admin.routes.Applications,
+      href: routes.dashboard.startup.routes.Applications,
       icon: FileText
     },
     {
-      title: 'Thesis',
-      href: routes.dashboard.admin.routes.Thesis,
+      title: 'Recommended Startup',
+      href: routes.dashboard.startup.routes.Thesis,
       icon: GraduationCap
     },
     {
-      title: 'Companies',
-      href: routes.dashboard.admin.routes.Companies,
-      icon: Hotel
+      title: 'Resources',
+      href: routes.dashboard.startup.routes.Companies,
+      icon: Files
     },
     {
-      title: 'Contacts',
-      href: routes.dashboard.admin.routes.Contacts,
-      icon: Contact
+      title: 'Mentorship',
+      href: routes.dashboard.startup.routes.Contacts,
+      icon: UserCog
+    },
+    {
+      title: 'Search Co-Founders',
+      href: routes.dashboard.startup.routes.Contacts,
+      icon: UserSearch
     }
   ];
 }

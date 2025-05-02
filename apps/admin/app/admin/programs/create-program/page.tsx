@@ -10,7 +10,7 @@ import { routes } from '@workspace/routes';
 import { Button } from '@workspace/ui/components/button';
 import { Input } from '@workspace/ui/components/input';
 
-import TabList from '~/components/admin/tabs';
+import TabList from '~/components/main/tabs';
 import { createTitle } from '~/lib/formatters';
 
 const PageTitle = ({ title, pageName }: any): React.JSX.Element => {

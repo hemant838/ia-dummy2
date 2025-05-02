@@ -8,7 +8,7 @@ import { getRedirectToSignIn } from '@workspace/auth/redirect';
 import { routes } from '@workspace/routes';
 import { SidebarInset } from '@workspace/ui/components/sidebar';
 
-import Breadcrumb from '~/components/admin/breadcrumb';
+import Breadcrumb from '~/components/main/breadcrumb';
 import { SidebarRenderer } from '~/components/organizations/slug/sidebar-renderer';
 import { getOrganizations } from '~/data/organization/get-organizations';
 import { createTitle } from '~/lib/formatters';

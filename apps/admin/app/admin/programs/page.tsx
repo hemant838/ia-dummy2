@@ -5,7 +5,7 @@ import { APP_NAME } from '@workspace/common/app';
 
 // import { getJWTToken } from '@workspace/auth/jwtAccessToken';
 
-import PageRenderer from '~/components/admin/pageRenderer';
+import PageRenderer from '~/components/main/pageRenderer';
 import { createTitle } from '~/lib/formatters';
 
 export const metadata: Metadata = {

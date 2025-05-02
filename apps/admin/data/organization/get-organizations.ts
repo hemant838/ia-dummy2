@@ -44,17 +44,23 @@ export async function getOrganizations(): Promise<OrganizationDto[]> {
           slug: organization.name
             ? organization.name?.toLowerCase()?.trim()?.replace(/\s+/g, '-')
             : undefined,
-          memberCount: organization.users.length
+          memberCount: organization.users?.length
         })
       );
 
       return response;
     },
-    Caching.createUserKeyParts(UserCacheKey.Organizations, ctx.session.user.id),
+    Caching.createUserKeyParts(
+      UserCacheKey.Organizations,
+      ctx?.session?.user?.id
+    ),
     {
       revalidate: defaultRevalidateTimeInSeconds,
       tags: [
-        Caching.createUserTag(UserCacheKey.Organizations, ctx.session.user.id)
+        Caching.createUserTag(
+          UserCacheKey.Organizations,
+          ctx?.session?.user?.id
+        )
       ]
     }
   )();

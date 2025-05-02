@@ -43,9 +43,9 @@ import {
 } from '@workspace/ui/components/table';
 import { cn } from '@workspace/ui/lib/utils';
 
-import { SearchableSelect } from '~/components/admin/form';
-import SideDrawer from '~/components/admin/SideDrawer';
-import TabList from '~/components/admin/tabs';
+import { SearchableSelect } from '~/components/main/form';
+import SideDrawer from '~/components/main/SideDrawer';
+import TabList from '~/components/main/tabs';
 import { useZodForm } from '~/hooks/use-zod-form';
 import {
   convertDateToISO,

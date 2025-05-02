@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 
 export default async function OrganizationsPage(): Promise<React.JSX.Element> {
   const token = await getJWTToken();
-  const organizations: any = await getOrganizations();
+  // const organizations: any = await getOrganizations();
 
   return (
     <div className="relative min-h-screen bg-background">
@@ -29,7 +29,7 @@ export default async function OrganizationsPage(): Promise<React.JSX.Element> {
         </Link>
       </div>
       <div className="relative mx-auto flex w-full min-w-80 max-w-lg flex-col items-stretch justify-start gap-6 pt-24">
-        <OrganizationList organizations={organizations} />
+        <OrganizationList organizations={[]} />
       </div>
       <div className="fixed inset-x-0 bottom-0 z-10 mx-auto mt-auto flex w-full min-w-80 max-w-lg flex-row items-center justify-center gap-4 bg-background p-4 text-xs text-muted-foreground">
         <span>

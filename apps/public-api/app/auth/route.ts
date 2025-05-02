@@ -85,10 +85,10 @@ import { withAuth } from '~/lib/with-auth';
  *               name:
  *                 type: string
  *                 example: "John Doe"
- *               type:
+ *               userType:
  *                 type: string
  *                 enum: [FOUNDER, MENTOR, INVESTOR, EIR, STAFF, GENERAL]
- *                 example: "FOUNDER"
+ *                 example: "GENERAL"
  *     responses:
  *       201:
  *         description: User registered successfully
