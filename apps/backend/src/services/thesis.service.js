@@ -96,7 +96,7 @@ const fetchById = async (id) => {
 const create = async (data) => {
   try {
     // Validate required fields
-    const required = ['name', 'ownerId'];
+    const required = ['name'];
 
     const missingFields = required.filter((field) => !data[field]);
     if (missingFields.length > 0) {
@@ -107,15 +107,17 @@ const create = async (data) => {
     }
 
     // Validate owner exists
-    const owner = await prisma.user.findUnique({
-      where: { id: data.ownerId },
-    });
+    if (data.ownerId) {
+      const owner = await prisma.user.findUnique({
+        where: { id: data.ownerId },
+      });
 
-    if (!owner) {
-      throw new ValidationErrors(
-        null,
-        `Owner with ID ${data.ownerId} not found`,
-      );
+      if (!owner) {
+        throw new ValidationErrors(
+          null,
+          `Owner with ID ${data.ownerId} not found`,
+        );
+      }
     }
 
     return prisma.thesis.create({

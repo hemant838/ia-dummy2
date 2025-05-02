@@ -167,15 +167,15 @@ const create = async (data) => {
       data: {
         startupId,
         programId,
-        eirId,
-        evaluationStage: evaluationStage || 'L1',
+        eirId: eirId || null,
+        evaluationStage: evaluationStage || 'APPLICATION_RECEIVED',
         evaluationStatus: evaluationStatus || 'SUBMITTED',
         ...rest,
       },
       include: {
         startup: true,
         program: true,
-        eir: true,
+        eir: eirId ? true : false,
       },
     });
   } catch (error) {

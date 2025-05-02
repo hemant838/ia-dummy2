@@ -114,8 +114,8 @@ const create = async (data) => {
     // Validate required fields
     const required = [
       'organizationId',
-      'thesisId',
-      'verticalPartnerId',
+      // 'thesisId',
+      // 'verticalPartnerId',
       'name',
       'legalName',
       'foundedDate',
@@ -134,8 +134,12 @@ const create = async (data) => {
     // Validate relationships exist
     const [organization, thesis, verticalPartner] = await Promise.all([
       prisma.organization.findUnique({ where: { id: data.organizationId } }),
-      prisma.thesis.findUnique({ where: { id: data.thesisId } }),
-      prisma.user.findUnique({ where: { id: data.verticalPartnerId } }),
+      data.thesisId
+        ? prisma.thesis.findUnique({ where: { id: data.thesisId } })
+        : null,
+      data.verticalPartnerId
+        ? prisma.user.findUnique({ where: { id: data.verticalPartnerId } })
+        : null,
     ]);
 
     if (!organization) {
@@ -144,13 +148,13 @@ const create = async (data) => {
         `Organization with ID ${data.organizationId} not found`,
       );
     }
-    if (!thesis) {
+    if (data.thesisId && !thesis) {
       throw new ValidationErrors(
         null,
         `Thesis with ID ${data.thesisId} not found`,
       );
     }
-    if (!verticalPartner) {
+    if (data.verticalPartnerId && !verticalPartner) {
       throw new ValidationErrors(
         null,
         `Vertical Partner with ID ${data.verticalPartnerId} not found`,
@@ -158,7 +162,7 @@ const create = async (data) => {
     }
 
     // Fetch thesisName if thesisId is provided and thesisName is not
-    let resolvedThesisName = data.thesisName;
+    let resolvedThesisName = data?.thesisName || null;
     if (data.thesisId && !data.thesisName) {
       const thesis = await prisma.thesis.findUnique({
         where: { id: data.thesisId },
@@ -173,7 +177,7 @@ const create = async (data) => {
     }
 
     // Fetch verticalPartnerName if verticalPartnerId is provided and verticalPartnerName is not
-    let resolvedVerticalPartnerName = data.verticalPartnerName;
+    let resolvedVerticalPartnerName = data.verticalPartnerName || null;
     if (data.verticalPartnerId && !data.verticalPartnerName) {
       const verticalPartner = await prisma.user.findUnique({
         where: { id: data.verticalPartnerId },

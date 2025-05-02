@@ -60,6 +60,22 @@ export const routes = {
         Contacts: `${baseUrl.Dashboard}/admin/contacts`
       }
     },
+    startup: {
+      Index: `${baseUrl.Dashboard}/admin`,
+      routes: {
+        Index: `${baseUrl.Dashboard}/admin/dashboard`,
+        programs: {
+          Index: `${baseUrl.Dashboard}/admin/programs`,
+          routes: {
+            CreateProgram: `${baseUrl.Dashboard}/admin/programs/create-program`
+          }
+        },
+        Applications: `${baseUrl.Dashboard}/admin/applications`,
+        Thesis: `${baseUrl.Dashboard}/admin/thesis`,
+        Companies: `${baseUrl.Dashboard}/admin/companies`,
+        Contacts: `${baseUrl.Dashboard}/admin/contacts`
+      }
+    },
     invitations: {
       AlreadyAccepted: `${baseUrl.Dashboard}/invitations/already-accepted`,
       Index: `${baseUrl.Dashboard}/invitations`,

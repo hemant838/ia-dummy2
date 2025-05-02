@@ -36,6 +36,10 @@ export default async function ContactsPage(): Promise<React.JSX.Element> {
         },
         {
           label: 'Corporate Partners',
+          value: 'PARTNER'
+        },
+        {
+          label: 'Investor',
           value: 'INVESTOR'
         },
         {
