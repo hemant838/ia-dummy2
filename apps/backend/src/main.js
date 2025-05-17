@@ -23,7 +23,7 @@ import itemRoutes from './routes/item.routes.js';
 import billRoutes from './routes/bill.routes.js';
 import billItemsRoutes from './routes/billItems.routes.js';
 import organizationRoutes from './routes/organization.routes.js';
-import { PrismaClient } from '@workspace/database';
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -63,12 +63,12 @@ app.use('/api/organizations', organizationRoutes);
 // Error Handling
 app.use(errorHandler);
 
-// async function main() {
-//   const claim = await prisma.organization.findMany();
-//   console.log(claim);
-// }
+async function main() {
+  const claim = await prisma.workshop.findMany();
+  console.log(claim);
+}
 
-// main();
+main();
 
 // Start Server
 const PORT = process.env.PORT || 3000;

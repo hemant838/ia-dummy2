@@ -1,4 +1,4 @@
-import { PrismaClient } from '@workspace/database';
+import { PrismaClient } from '@prisma/client';
 import { handleError, HTTP_STATUS } from '../helper/errorHandler.js';
 import { pagination } from '../helper/pagination.js';
 

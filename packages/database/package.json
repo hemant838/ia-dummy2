@@ -9,7 +9,9 @@
     "generate": "prisma generate",
     "migrate": "prisma migrate",
     "push": "prisma db push --skip-generate",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "build": "tsc",
+    "dev": "tsc --watch"
   },
   "dependencies": {
     "@prisma/client": "6.4.1",
@@ -24,10 +26,21 @@
     "prisma": "6.4.1"
   },
   "prettier": "@workspace/prettier-config",
+  "main": "./dist/index.js",
+  "types": "./src/index.ts",
   "exports": {
-    ".": "./src/index.ts",
-    "./keys": "./keys.ts",
-    "./client": "./src/client.ts",
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./dist/index.js"
+    },
+    "./keys": {
+      "types": "./keys.ts",
+      "import": "./dist/keys.js"
+    },
+    "./client": {
+      "types": "./src/client.ts",
+      "import": "./dist/client.js"
+    },
     "./backend-prisma-client": "./generated/backend-client/index.js"
   }
 }

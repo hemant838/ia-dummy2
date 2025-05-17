@@ -1,5 +1,10 @@
 {
   "extends": "@workspace/typescript-config/base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": ".",
+    "declaration": true
+  },
   "include": ["."],
   "exclude": [".cache", ".turbo", "build", "dist", "node_modules"]
 }
