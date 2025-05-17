@@ -1,35 +1,36 @@
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const { PrismaClient } = require('@workspace/database/backend-prisma-client');
+import pkg from 'bcryptjs';
+const { compare, hash } = pkg;
+import jwt from 'jsonwebtoken';
+const { verify } = jwt;
+import { PrismaClient } from '@workspace/database/backend-prisma-client';
 const prisma = new PrismaClient();
+import {handleError} from '../helper/errorHandler.js'
 
-const { BadRequest, Unauthorized, ValidationErrors } = require('../exceptions');
-const config = require('../configs/app.config');
-
-const JWT_SECRET = config.jwtSecret;
+const { BadRequestError, Unauthorized, validationErrorHandler } = handleError;
+const JWT_SECRET = process.env.JWT_SECRET;
 
 const ACCESS_TOKEN_EXPIRY = '15m';
 const REFRESH_TOKEN_EXPIRY = '30d';
 
-// function generateTokens(user) {
-//   const payload = {
-//     userId: user.id,
-//     email: user.email,
-//     emailVerified: user.emailVerified || false,
-//     role: user.role,
-//   };
+function generateTokens(user) {
+  const payload = {
+    userId: user.id,
+    email: user.email,
+    emailVerified: user.emailVerified || false,
+    role: user.role,
+  };
 
-//   const accessToken = jwt.sign(payload, JWT_SECRET, {
-//     expiresIn: ACCESS_TOKEN_EXPIRY,
-//   });
-//   const refreshToken = jwt.sign(payload, JWT_SECRET, {
-//     expiresIn: REFRESH_TOKEN_EXPIRY,
-//   });
+  const accessToken = jwt.sign(payload, JWT_SECRET, {
+    expiresIn: ACCESS_TOKEN_EXPIRY,
+  });
+  const refreshToken = jwt.sign(payload, JWT_SECRET, {
+    expiresIn: REFRESH_TOKEN_EXPIRY,
+  });
 
-//   return { accessToken, refreshToken };
-// }
+  return { accessToken, refreshToken };
+}
 
-login = async ({ email, password }) => {
+const login = async ({ email, password }) => {
   if (!email || !password) {
     throw new ValidationErrors(null, 'Email and password are required');
   }
@@ -37,28 +38,28 @@ login = async ({ email, password }) => {
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) throw new Unauthorized('Invalid email or password');
 
-  const isMatch = await bcrypt.compare(password, user.password);
+  const isMatch = await compare(password, user.password);
   if (!isMatch) throw new Unauthorized('Invalid email or password');
 
-  // const token = generateTokens(user);
+   const token = generateTokens(user);
 
-  return { user };
+  return { user, token };
 };
 
-register = async (payload) => {
+const register = async (payload) => {
   const requiredFields = ['name', 'email', 'password'];
   for (const field of requiredFields) {
     if (!payload[field]) {
-      throw new ValidationErrors(null, `${field} is required`);
+      throw new validationErrorHandler(null, `${field} is required`);
     }
   }
 
   const existing = await prisma.user.findUnique({
     where: { email: payload.email },
   });
-  if (existing) throw new BadRequest('Email already in use');
+  if (existing) throw new BadRequestError('Email already in use');
 
-  const hashedPassword = await bcrypt.hash(payload.password, 10);
+  const hashedPassword = await hash(payload.password, 10);
 
   // Check if an organization exists
   let organization = await prisma.organization.findFirst();
@@ -68,9 +69,11 @@ register = async (payload) => {
       data: {
         name: 'Default',
         stripeCustomerId: '8112fb21-1a94-47a2-8624-21cae9a467ba',
+        slug: 'default'
       },
     });
   }
+console.log(payload.role);
 
   const newUser = await prisma.user.create({
     data: {
@@ -78,17 +81,16 @@ register = async (payload) => {
       email: payload.email,
       password: hashedPassword,
       organizationId: organization.id,
-      userType: payload.userType || 'GENERAL',
-      role: payload.role || 'MEMBER',
+       role: payload.role || 'Generic_Support',
     },
   });
 
-  // const token = generateTokens(newUser);
+  const token = generateTokens(newUser);
 
-  return { user: newUser };
+  return { user: newUser, token };
 };
 
-logout = async (user) => {
+const logout = async (user) => {
   // Optional: Invalidate session if using JWT blacklisting or session model
   res.clearCookie('next-auth.session-token');
   res.clearCookie('__Secure-next-auth.session-token');
@@ -97,9 +99,9 @@ logout = async (user) => {
   return true;
 };
 
-refreshTokens = async (refreshToken) => {
+const refreshTokens = async (refreshToken) => {
   try {
-    const payload = jwt.verify(refreshToken, JWT_SECRET);
+    const payload = verify(refreshToken, JWT_SECRET);
     const user = await prisma.user.findUnique({
       where: { id: payload.userId },
     });
@@ -113,10 +115,10 @@ refreshTokens = async (refreshToken) => {
   }
 };
 
-module.exports = {
+export default {
   login,
   register,
   logout,
-  // generateTokens,
+  generateTokens,
   refreshTokens,
 };

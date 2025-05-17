@@ -1,70 +1,83 @@
-require('dotenv').config();
+import express, { json } from 'express';
+import cors from 'cors';
+import morgan from 'morgan';
+import { handleError } from './helper/errorHandler.js';
+import dotenv from 'dotenv';
+import cookieParser from 'cookie-parser';
+import userRoutes from './routes/user.routes.js';
+import claimRoutes from './routes/claim.routes.js';
+import authRoutes from './routes/auth.route.js';
+import icRoutes from './routes/ic.routes.js';
+import roRoutes from './routes/ro.routes.js';
+import hubRoutes from './routes/hub.routes.js';
+import vehicleRoutes from './routes/vehicle.routes.js';
+import ownerRoutes from './routes/owner.routes.js';
+import insurancePolicyRoutes from './routes/insurancePolicy.routes.js';
+import driverRoutes from './routes/driver.routes.js';
+import lossAndSurveyDetailsRoutes from './routes/lossAndSurveyDetails.routes.js';
+import workshopRoutes from './routes/workshop.routes.js';
+import incidentRoutes from './routes/incident.routes.js';
+import workOrderRoutes from './routes/workOrder.routes.js';
+import claimStatusRoutes from './routes/claimStatus.routes.js';
+import itemRoutes from './routes/item.routes.js';
+import billRoutes from './routes/bill.routes.js';
+import billItemsRoutes from './routes/billItems.routes.js';
+import organizationRoutes from './routes/organization.routes.js';
+import { PrismaClient } from '@workspace/database';
 
-const express = require('express');
-const responseTime = require('response-time');
-const cors = require('cors');
-const compression = require('compression');
-const helmet = require('helmet');
-const cookieParser = require('cookie-parser');
+const prisma = new PrismaClient();
 
-const appConfig = require('./configs/app.config');
-const helpers = require('./helpers');
-const middlewares = require('./middlewares');
-
-const routes = require('./routes');
+const { errorHandler } = handleError;
+dotenv.config();
 
 const app = express();
 
-app.use(helmet());
-app.use(compression());
+// Middleware
+app.use(cors());
+app.use(morgan('dev'));
+app.use(express.json());
+app.use(cookieParser())
+app.use(express.urlencoded({ extended: true }));
 
-const ALLOWED_ORIGINS = appConfig.allowedOrigin;
-const corsOrigin =
-  Array.isArray(ALLOWED_ORIGINS) && ALLOWED_ORIGINS.length
-    ? ALLOWED_ORIGINS
-    : '*';
+// Routes
+app.use('/api/users', userRoutes);
+app.use('/api/claims', claimRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/ics', icRoutes);
+app.use('/api/ros', roRoutes);
+app.use('/api/hubs', hubRoutes);
+app.use('/api/vehicles', vehicleRoutes);
+app.use('/api/owners', ownerRoutes);
+app.use('/api/insurance-policies', insurancePolicyRoutes);
+app.use('/api/drivers', driverRoutes);
+app.use('/api/loss-and-survey-details', lossAndSurveyDetailsRoutes);
+app.use('/api/workshops', workshopRoutes);
+app.use('/api/incidents', incidentRoutes);
+app.use('/api/work-orders', workOrderRoutes);
+app.use('/api/claim-statuses', claimStatusRoutes);
+app.use('/api/items', itemRoutes);
+app.use('/api/bills', billRoutes);
+app.use('/api/bill-items', billItemsRoutes);
+app.use('/api/organizations', organizationRoutes);
 
-const corsOptions = {
-  origin: corsOrigin,
-  credentials: true,
-  optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
-  // allowedHeaders: ['x-requested-with', 'Content-Type', 'Authorization', 'Accept'] // Adjust as necessary
-};
+// Error Handling
+app.use(errorHandler);
 
-app.use(cors(corsOptions));
-app.use(express.urlencoded({ extended: false, limit: '512mb' }));
-app.use(express.json({ limit: '50mb' }));
-app.use(cookieParser());
+// async function main() {
+//   const claim = await prisma.organization.findMany();
+//   console.log(claim);
+// }
 
-app.use(
-  responseTime((req, res, time) => {
-    res.setHeader('X-Response-Time', `${time}ms`);
-  }),
-);
-app.use(express.text());
+// main();
 
-app.set('trust proxy', true);
-
-app.use(middlewares.addRequestId);
-
-app.use('/', routes);
-
-app.use(helpers.response.handler404);
-app.use(helpers.response.handler5xx);
-
-// Catch unhandled exception.
-process.on('uncaughtException', function (err) {
-  console.log(err);
-  console.error(
-    `Unhandled exception orderId=${err.orderId}`,
-    err,
-    err.requestId || 'unhandled',
-    true,
-  );
-});
-
-app.listen(appConfig.port, () => {
-  console.log(
-    `App running in ${appConfig.env} at http://localhost:${appConfig.port}`,
-  );
+// Start Server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, async () => {
+  console.log(`Server running on port ${PORT}`);
+  try {
+    await prisma.$connect();
+    console.log('Connected to the database');
+  } catch (error) {
+    console.error('Error connecting to the database:', error);
+  }
 });

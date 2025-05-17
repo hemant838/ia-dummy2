@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "src/main.js",
+  "type": "module",
   "scripts": {
-    "dev": "nodemon main.js",
-    "start": "node main.js",
+    "dev": "nodemon src/main.js",
+    "start": "node src/main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -13,6 +14,7 @@
   "license": "ISC",
   "dependencies": {
     "@auth/express": "^0.9.0",
+    "@supabase/supabase-js": "^2.49.4",
     "@workspace/database": "workspace:*",
     "bcryptjs": "2.4.3",
     "compression": "^1.8.0",
@@ -23,6 +25,7 @@
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "moment": "^2.30.1",
+    "morgan": "^1.10.0",
     "nanoid": "^5.1.5",
     "response-time": "^2.3.3"
   },

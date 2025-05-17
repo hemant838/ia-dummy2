@@ -1,184 +1,13 @@
 generator client {
   provider        = "prisma-client-js"
-  output          = "../generated/backend-client"
-  previewFeatures = []
+  previewFeatures = ["multiSchema"]
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = "postgresql://postgres:zJ3peQKuZXJmY7zQmTMbyHak5kkqf3Tw@supabase-dev.indiaaccelerator.co:5433/postgres?connection_limit=1"
+  schemas = ["paramount"]
 }
-
-// ---- Enumerations ---- //
-
-enum ActionType {
-  CREATE @map("create")
-  UPDATE @map("update")
-  DELETE @map("delete")
-}
-
-enum ActorType {
-  SYSTEM @map("system")
-  MEMBER @map("member")
-  API    @map("api")
-}
-
-enum ContactRecord {
-  PERSON  @map("person")
-  COMPANY @map("company")
-}
-
-enum ContactStage {
-  LEAD           @map("lead")
-  QUALIFIED      @map("qualified")
-  OPPORTUNITY    @map("opportunity")
-  PROPOSAL       @map("proposal")
-  IN_NEGOTIATION @map("inNegotiation")
-  LOST           @map("lost")
-  WON            @map("won")
-}
-
-enum ContactTaskStatus {
-  OPEN      @map("open")
-  COMPLETED @map("completed")
-}
-
-enum DayOfWeek {
-  SUNDAY    @map("sunday")
-  MONDAY    @map("monday")
-  TUESDAY   @map("tuesday")
-  WEDNESDAY @map("wednesday")
-  THURSDAY  @map("thursday")
-  FRIDAY    @map("friday")
-  SATURDAY  @map("saturday")
-}
-
-enum FeedbackCategory {
-  SUGGESTION @map("suggestion")
-  PROBLEM    @map("problem")
-  QUESTION   @map("question")
-}
-
-enum InvitationStatus {
-  PENDING  @map("pending")
-  ACCEPTED @map("accepted")
-  REVOKED  @map("revoked")
-}
-
-enum Role {
-  MEMBER @map("member")
-  ADMIN  @map("admin")
-}
-
-enum WebhookTrigger {
-  CONTACT_CREATED @map("contactCreated")
-  CONTACT_UPDATED @map("contactUpdated")
-  CONTACT_DELETED @map("contactDeleted")
-}
-
-enum UserType {
-  FOUNDER
-  MENTOR
-  PARTNER
-  INVESTOR
-  EIR
-  STAFF
-  GENERAL
-}
-
-enum ProgramStatus {
-  OPEN
-  CLOSED
-  DRAFT
-  ON_HOLD
-  ARCHIVED
-  UPCOMING
-}
-
-enum StartupStage {
-  IDEA
-  MVP
-  EARLY_TRACTION
-  SCALING
-  ACCELERATION
-  GROWTH
-  PMF
-  PRE_PRODUCT
-  PRE_REVENUE
-}
-
-enum InvestmentType {
-  SEED
-  SERIES_A
-  SERIES_B
-  SERIES_C
-  ANGEL
-  CONVERTIBLE_NOTE
-  SAFE
-}
-
-enum EvaluationStage {
-  L1
-  L2
-  L2_5
-  L3
-  L4
-  APPLICATION_RECEIVED
-  INVESTMENT_COMPLETED
-  OH_HOLD
-  DROPPED
-  REJECTED
-  NO_VALUE
-}
-
-enum EvaluationStatus {
-  SUBMITTED
-  IN_REVIEW
-  ON_HOLD
-  PASSED
-  DROPPED
-}
-
-enum DocumentType {
-  INVESTMENT_NOTE
-  PITCH_DECK
-  ONE_PAGER
-  TERM_SHEET
-  MANDATE_LETTER
-  OTHER
-}
-
-enum MetricType {
-  MRR
-  ARR
-  PROFIT
-  EBITDA
-  BURN
-}
-
-enum StartupSource {
-  CAMPUS_INSTITUTE
-  CORE_TEAM
-  MENTORS
-  PEER_FOUNDERS
-  LINKEDIN
-  COWORKING
-  WEBSITE_INBOUND
-  EVENTS
-  APPLICATION_FORM
-  TRAXCN
-  OTHERS
-  NO_SOURCE
-}
-
-enum StartupType {
-  PORTFOLIO_COMPANY
-  COWORKING
-  EXTERNAL_CLIENT
-  FUNDING_APPLICANT
-}
-
-// ---- Models ---- //
 
 model Account {
   id                String   @id(map: "PK_Account") @default(uuid()) @db.Uuid
@@ -186,33 +15,35 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String?  @db.Text
-  access_token      String?  @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String?  @db.Text
+  id_token          String?
   session_state     String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
   @@index([userId], map: "IX_Account_userId")
+  @@schema("paramount")
 }
 
 model ApiKey {
   id             String       @id(map: "PK_ApiKey") @default(uuid()) @db.Uuid
   organizationId String       @db.Uuid
   description    String       @db.VarChar(70)
-  hashedKey      String       @unique()
+  hashedKey      String       @unique
   expiresAt      DateTime?
   lastUsedAt     DateTime?
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@index([organizationId], map: "IX_ApiKey_organizationId")
+  @@schema("paramount")
 }
 
 model AuthenticatorApp {
@@ -224,9 +55,10 @@ model AuthenticatorApp {
   recoveryCodes String   @db.VarChar(1024)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId], map: "IX_AuthenticatorApp_userId")
+  @@schema("paramount")
 }
 
 model ChangeEmailRequest {
@@ -237,15 +69,15 @@ model ChangeEmailRequest {
   valid     Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId], map: "IX_ChangeEmailRequest_userId")
+  @@schema("paramount")
 }
 
 model Contact {
   id             String             @id(map: "PK_Contact") @default(uuid()) @db.Uuid
   organizationId String             @db.Uuid
-  userId         String?            @unique @db.Uuid // New field to link to User
   record         ContactRecord      @default(PERSON)
   image          String?            @db.VarChar(2048)
   name           String             @db.VarChar(255)
@@ -255,18 +87,17 @@ model Contact {
   stage          ContactStage       @default(LEAD)
   createdAt      DateTime           @default(now())
   updatedAt      DateTime           @updatedAt
-  organization   Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  user           User?              @relation(fields: [userId], references: [id]) // New relation to User
+  organization   Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   activities     ContactActivity[]
   comments       ContactComment[]
   notes          ContactNote[]
   pageVisits     ContactPageVisit[]
-  tags           ContactTag[]
-  favorites      Favorite[]
   tasks          ContactTask[]
+  favorites      Favorite[]
+  tags           ContactTag[]       @relation("ContactToContactTag")
 
   @@index([organizationId], map: "IX_Contact_organizationId")
-  @@index([userId])
+  @@schema("paramount")
 }
 
 model ContactActivity {
@@ -277,10 +108,11 @@ model ContactActivity {
   actorType  ActorType
   metadata   Json?
   occurredAt DateTime   @default(now())
-  contact    Contact    @relation(fields: [contactId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  contact    Contact    @relation(fields: [contactId], references: [id], onDelete: Cascade)
 
   @@index([contactId], map: "IX_ContactActivity_contactId")
   @@index([occurredAt], map: "IX_ContactActivity_occurredAt")
+  @@schema("paramount")
 }
 
 model ContactComment {
@@ -290,11 +122,12 @@ model ContactComment {
   text      String   @db.VarChar(2000)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  contact   Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  contact   Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([contactId], map: "IX_ContactComment_contactId")
   @@index([userId], map: "IX_ContactComment_userId")
+  @@schema("paramount")
 }
 
 model ContactImage {
@@ -305,6 +138,7 @@ model ContactImage {
   hash        String? @db.VarChar(64)
 
   @@index([contactId], map: "IX_ContactImage_contactId")
+  @@schema("paramount")
 }
 
 model ContactNote {
@@ -314,11 +148,12 @@ model ContactNote {
   text      String?  @db.VarChar(8000)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  contact   Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  contact   Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([contactId], map: "IX_ContactNote_contactId")
   @@index([userId], map: "IX_ContactNote_userId")
+  @@schema("paramount")
 }
 
 model ContactPageVisit {
@@ -326,17 +161,20 @@ model ContactPageVisit {
   contactId String   @db.Uuid
   userId    String?  @db.Uuid
   timestamp DateTime @default(now())
-  contact   Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  contact   Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  user      User?    @relation(fields: [userId], references: [id])
 
   @@index([contactId], map: "IX_ContactPageVisit_contactId")
   @@index([userId], map: "IX_ContactPageVisit_userId")
+  @@schema("paramount")
 }
 
 model ContactTag {
   id       String    @id(map: "PK_ContactTag") @default(uuid()) @db.Uuid
   text     String    @unique @db.VarChar(128)
-  contacts Contact[]
+  contacts Contact[] @relation("ContactToContactTag")
+
+  @@schema("paramount")
 }
 
 model ContactTask {
@@ -348,9 +186,10 @@ model ContactTask {
   dueDate     DateTime?
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
-  contact     Contact           @relation(fields: [contactId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  contact     Contact           @relation(fields: [contactId], references: [id], onDelete: Cascade)
 
   @@index([contactId], map: "IX_ContactTask_contactId")
+  @@schema("paramount")
 }
 
 model Favorite {
@@ -358,11 +197,12 @@ model Favorite {
   userId    String  @db.Uuid
   contactId String  @db.Uuid
   order     Int     @default(0)
-  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  contact   Contact @relation(fields: [contactId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  contact   Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId], map: "IX_Favorite_userId")
   @@index([contactId], map: "IX_Favorite_contactId")
+  @@schema("paramount")
 }
 
 model Feedback {
@@ -373,11 +213,12 @@ model Feedback {
   message        String           @db.VarChar(4000)
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
-  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  user           User?            @relation(fields: [userId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User?            @relation(fields: [userId], references: [id])
 
   @@index([organizationId], map: "IX_Feedback_organizationId")
   @@index([userId], map: "IX_Feedback_userId")
+  @@schema("paramount")
 }
 
 model Invitation {
@@ -385,15 +226,30 @@ model Invitation {
   organizationId String           @db.Uuid
   token          String           @default(uuid()) @db.Uuid
   email          String           @db.VarChar(255)
-  role           Role             @default(MEMBER)
   status         InvitationStatus @default(PENDING)
   lastSentAt     DateTime?
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
-  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  role           Role
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@index([organizationId], map: "IX_Invitation_organizationId")
   @@index([token], map: "IX_Invitation_token")
+  @@schema("paramount")
+}
+
+model Membership {
+  id             String       @id(map: "PK_Membership") @default(uuid()) @db.Uuid
+  organizationId String       @db.Uuid
+  userId         String       @db.Uuid
+  isOwner        Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+  role           Role
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@schema("paramount")
 }
 
 model Notification {
@@ -406,40 +262,56 @@ model Notification {
   dismissed Boolean   @default(false)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId], map: "IX_Notification_userId")
+  @@schema("paramount")
 }
 
 model Organization {
-  id                  String       @id(map: "PK_Organization") @default(uuid()) @db.Uuid
-  stripeCustomerId    String
-  name                String       @db.VarChar(255)
-  address             String?      @db.VarChar(255)
-  phone               String?      @db.VarChar(32)
-  email               String?      @db.VarChar(255)
-  website             String?      @db.VarChar(2000)
-  linkedInProfile     String?      @db.VarChar(2000)
-  instagramProfile    String?      @db.VarChar(2000)
-  youTubeChannel      String?      @db.VarChar(2000)
-  xProfile            String?      @db.VarChar(2000)
-  tikTokProfile       String?      @db.VarChar(2000)
-  facebookPage        String?      @db.VarChar(2000)
-  completedOnboarding Boolean      @default(false)
-  billingPlan         String       @default("free") @db.VarChar(255)
-  apiKeys             ApiKey[]
-  businessHours       WorkHours[]
-  contacts            Contact[]
-  feedback            Feedback[]
-  invitations         Invitation[]
-  users               User[]
-  webhooks            Webhook[]
-  startups            Startup[]
-  programs            Program[]
-  createdAt           DateTime     @default(now())
-  updatedAt           DateTime     @updatedAt
+  id               String       @id(map: "PK_Organization") @default(uuid()) @db.Uuid
+  stripeCustomerId String
+  name             String       @db.VarChar(255)
+  address          String?      @db.VarChar(255)
+  phone            String?      @db.VarChar(32)
+  email            String?      @db.VarChar(255)
+  website          String?      @db.VarChar(2000)
+  tier             String       @default("free") @db.VarChar(255)
+  facebookPage     String?      @db.VarChar(2000)
+  instagramProfile String?      @db.VarChar(2000)
+  linkedInProfile  String?      @db.VarChar(2000)
+  tikTokProfile    String?      @db.VarChar(2000)
+  xProfile         String?      @db.VarChar(2000)
+  youTubeChannel   String?      @db.VarChar(2000)
+  logo             String?      @db.VarChar(2048)
+  slug             String       @db.VarChar(255)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  apiKeys          ApiKey[]
+  billToICs        BillToIC[]
+  claims           Claim[]
+  contacts         Contact[]
+  feedback         Feedback[]
+  ics              IC[]
+  invitations      Invitation[]
+  memberships      Membership[]
+  users            User[]
+  webhooks         Webhook[]
+  businessHours    WorkHours[]
 
   @@index([stripeCustomerId], map: "IX_Organization_stripeCustomerId")
+  @@schema("paramount")
+}
+
+model OrganizationLogo {
+  id             String  @id(map: "PK_OrganizationLogo") @default(uuid()) @db.Uuid
+  organizationId String  @db.Uuid
+  data           Bytes?
+  contentType    String? @db.VarChar(255)
+  hash           String? @db.VarChar(64)
+
+    @@index([organizationId], map: "IX_OrganizationLogo_organizationId")
+  @@schema("paramount")
 }
 
 model ResetPasswordRequest {
@@ -450,6 +322,7 @@ model ResetPasswordRequest {
   updatedAt DateTime @updatedAt
 
   @@index([email], map: "IX_ResetPasswordRequest_email")
+  @@schema("paramount")
 }
 
 model Session {
@@ -457,24 +330,22 @@ model Session {
   sessionToken String   @unique
   userId       String   @db.Uuid
   expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId], map: "IX_Session_userId")
+  @@schema("paramount")
 }
 
 model User {
   id                           String               @id(map: "PK_User") @default(uuid()) @db.Uuid
-  organizationId               String?              @db.Uuid
   image                        String?              @db.VarChar(2048)
   name                         String               @db.VarChar(64)
   email                        String?              @unique
-  authId                       String?              @unique
   emailVerified                DateTime?
   password                     String?              @db.VarChar(60)
   lastLogin                    DateTime?
-  role                         Role                 @default(MEMBER)
   phone                        String?              @db.VarChar(32)
   locale                       String               @default("en-US") @db.VarChar(8)
   completedOnboarding          Boolean              @default(false)
@@ -485,37 +356,24 @@ model User {
   enabledProductUpdates        Boolean              @default(false)
   createdAt                    DateTime             @default(now())
   updatedAt                    DateTime             @updatedAt
+  organizationId               String               @db.Uuid
+  status                       EntityStatus         @default(ACTIVE)
+  role                         Role                 @default(GENERIC_SUPPORT)
   accounts                     Account[]
   authenticatorApp             AuthenticatorApp?
   changeEmailRequests          ChangeEmailRequest[]
+  updatedClaimStatuses         ClaimStatus[]        @relation("StatusUpdatedBy")
   comments                     ContactComment[]
+  notes                        ContactNote[]
+  pageVisits                   ContactPageVisit[]
   favorites                    Favorite[]
   feedback                     Feedback[]
-  notes                        ContactNote[]
+  memberships                  Membership[]
   notifications                Notification[]
-  organization                 Organization?        @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  pageVisits                   ContactPageVisit[]
   sessions                     Session[]
-  userType                     UserType             @default(GENERAL)
-  linkedInProfile              String?              @db.VarChar(2000)
-  bio                          String?              @db.VarChar(5000)
-  expertise                    String[]
-  founderProfile               FounderProfile?
-  investorProfile              InvestorProfile?
-  mentorProfile                MentorProfile?
-
-  startups                Startup[]
-  mentorships             Mentorship[]
-  investments             Investment[]
-  eventsAttended          Event[]
-  Contact                 Contact?
-  eirApplications         StartupApplication[] @relation("EIR")
-  ownedTheses             Thesis[]             @relation("ThesisOwner")
-  verticalPartnerStartups Startup[]            @relation("VerticalPartner")
-  StartupNote             StartupNote[]
-  StartupStageChange      StartupStageChange[]
-
-  @@index([organizationId], map: "IX_User_organizationId")
+  organizations                Organization         @relation(fields: [organizationId], references: [id])
+  claims                       Claim[]              @relation("ClaimToUser")
+  @@schema("paramount")
 }
 
 model UserImage {
@@ -526,6 +384,7 @@ model UserImage {
   hash        String? @db.VarChar(64)
 
   @@index([userId], map: "IX_UserImage_userId")
+  @@schema("paramount")
 }
 
 model VerificationToken {
@@ -534,6 +393,7 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+  @@schema("paramount")
 }
 
 model Webhook {
@@ -547,16 +407,18 @@ model Webhook {
   organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@index([organizationId], map: "IX_Webhook_organizationId")
+  @@schema("paramount")
 }
 
 model WorkHours {
   id             String         @id(map: "PK_WorkHours") @default(uuid()) @db.Uuid
   organizationId String         @db.Uuid
   dayOfWeek      DayOfWeek      @default(SUNDAY)
-  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   timeSlots      WorkTimeSlot[]
 
   @@index([organizationId], map: "IX_WorkHours_organizationId")
+  @@schema("paramount")
 }
 
 model WorkTimeSlot {
@@ -564,305 +426,528 @@ model WorkTimeSlot {
   workHoursId String    @db.Uuid
   start       DateTime  @db.Time(0)
   end         DateTime  @db.Time(0)
-  workHours   WorkHours @relation(fields: [workHoursId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  workHours   WorkHours @relation(fields: [workHoursId], references: [id], onDelete: Cascade)
 
   @@index([workHoursId], map: "IX_WorkTimeSlot_workHoursId")
+  @@schema("paramount")
 }
 
-model Startup {
-  id                               String               @id @default(uuid()) @db.Uuid
-  organizationId                   String               @db.Uuid
-  thesisId                         String?              @db.Uuid
-  thesisName                       String?
-  verticalPartnerId                String?              @db.Uuid
-  name                             String               @db.VarChar(255)
-  legalName                        String               @db.VarChar(255)
-  description                      String               @db.VarChar(5000)
-  foundedDate                      DateTime
-  stage                            StartupStage
-  location                         String               @db.VarChar(255)
-  website                          String?              @db.VarChar(2000)
-  pitchDeck                        String?              @db.VarChar(2000)
-  logo                             Bytes?
-  logoContentType                  String?              @db.VarChar(255)
-  industry                         String[]
-  domains                          String[]
-  fundingRaised                    Decimal?             @db.Decimal(10, 2)
-  employeeCount                    Int?
-  evaluationStage                  EvaluationStage      @default(NO_VALUE)
-  startupIndustryDomain            String?
-  investmentType                   InvestmentType?
-  startupSource                    StartupSource?
-  referredById                     String?
-  type                             StartupType?
-  startupPriority                  String?
-  dataRoomGDriveLinkPrimary        String?
-  dataRoomGDriveLinkPrimaryLabel   String?
-  dataRoomGDriveLinkSecondaryLinks String?
-  l1DueDate                        DateTime?
-  l2DueDate                        DateTime?
-  l2_5DueDate                      DateTime?
-  l3DueDate                        DateTime?
-  poc                              Boolean?
-  followOnFundingReady             Boolean?
-  verticalPartnerName              String?
-  createdBySource                  String?
-  createdByWorkspaceMemberId       String?
-  createdByName                    String?
-  campusEvaluationScore            Float?
-  remarks                          String?
-  founders                         User[]
-  mentors                          Mentorship[]
-  investments                      Investment[]
-  organization                     Organization         @relation(fields: [organizationId], references: [id])
-  thesis                           Thesis?              @relation(fields: [thesisId], references: [id])
-  verticalPartner                  User?                @relation("VerticalPartner", fields: [verticalPartnerId], references: [id])
-  programs                         Program[]
-  applications                     StartupApplication[]
-  documents                        StartupDocument[]
-  stageChanges                     StartupStageChange[]
-  createdAt                        DateTime             @default(now())
-  updatedAt                        DateTime             @updatedAt
-  FounderProfile                   FounderProfile[]
+model IC {
+  id                String            @id @default(uuid()) @db.Uuid
+  organizationId    String            @db.Uuid
+  name              String
+  ic_code           String
+  address           String
+  GST               String
+  contactPersonName String
+  contactNumber     String
+  contactEmail      String
+  status            EntityStatus      @default(ACTIVE)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  organization      Organization      @relation(fields: [organizationId], references: [id])
+  insurancePolicy   InsurancePolicy[]
+  ros               RO[]
 
-  @@index([organizationId])
-  @@index([thesisId])
-  @@index([verticalPartnerId])
+  @@schema("paramount")
 }
 
-model StartupApplication {
-  id                  String               @id @default(uuid()) @db.Uuid
-  startupId           String               @db.Uuid
-  programId           String               @db.Uuid
-  eirId               String?              @db.Uuid
-  evaluationStage     EvaluationStage      @default(NO_VALUE)
-  evaluationStatus    EvaluationStatus     @default(SUBMITTED)
-  fundingAskAmount    Decimal?             @db.Decimal(10, 2)
-  fundingAskValuation Decimal?             @db.Decimal(10, 2)
-  appliedAt           DateTime             @default(now())
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
-  startup             Startup              @relation(fields: [startupId], references: [id])
-  program             Program              @relation(fields: [programId], references: [id])
-  eir                 User?                @relation("EIR", fields: [eirId], references: [id])
-  documents           StartupDocument[]
-  notes               StartupNote[]
-  metrics             StartupMetric[]
-  competitors         StartupCompetitor[]
-  stageChanges        StartupStageChange[]
+model RO {
+  id                String       @id @default(uuid()) @db.Uuid
+  icId              String       @db.Uuid
+  name              String
+  ro_code           String
+  address           String
+  GST               String
+  contactPersonName String
+  contactNumber     String
+  contactEmail      String
+  status            EntityStatus @default(ACTIVE)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  hubs              Hub[]
 
-  @@index([startupId])
-  @@index([programId])
-  @@index([eirId])
+  ic                IC           @relation(fields: [icId], references: [id])
+
+  @@schema("paramount")
 }
 
-model StartupStageChange {
-  id                   String              @id @default(uuid()) @db.Uuid
-  startupId            String              @db.Uuid
-  startupApplicationId String?             @db.Uuid
-  fromStage            StartupStage
-  toStage              StartupStage
-  changedAt            DateTime            @default(now())
-  changedBy            String              @db.Uuid
-  notes                String?             @db.VarChar(1000)
-  startup              Startup             @relation(fields: [startupId], references: [id])
-  startupApplication   StartupApplication? @relation(fields: [startupApplicationId], references: [id])
-  user                 User                @relation(fields: [changedBy], references: [id])
+model Hub {
+  id                String       @id @default(uuid()) @db.Uuid
+  roId              String       @db.Uuid
+  name              String
+  hub_code          String
+  address           String
+  GST               String
+  contactPersonName String
+  contactNumber     String
+  contactEmail      String
+  status            EntityStatus @default(ACTIVE)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  claims            Claim[]
+  ro                RO           @relation(fields: [roId], references: [id])
 
-  @@index([startupId])
-  @@index([startupApplicationId])
-  @@index([changedBy])
+  @@schema("paramount")
 }
 
-model Thesis {
-  id          String    @id @default(uuid()) @db.Uuid
-  name        String    @db.VarChar(255)
-  ownerId     String?   @db.Uuid
-  description String?   @db.VarChar(1000)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  owner       User?     @relation("ThesisOwner", fields: [ownerId], references: [id])
-  startups    Startup[]
-
-  @@index([ownerId])
-}
-
-model StartupDocument {
-  id                   String              @id @default(uuid()) @db.Uuid
-  startupId            String              @db.Uuid
-  startupApplicationId String?             @db.Uuid
-  documentType         DocumentType
-  fileUrl              String              @db.VarChar(2048)
-  createdAt            DateTime            @default(now())
-  updatedAt            DateTime            @updatedAt
-  startup              Startup             @relation(fields: [startupId], references: [id])
-  startupApplication   StartupApplication? @relation(fields: [startupApplicationId], references: [id])
-
-  @@index([startupId])
-  @@index([startupApplicationId])
-}
-
-model StartupNote {
+model InsurancePolicy {
   id                   String             @id @default(uuid()) @db.Uuid
-  startupApplicationId String             @db.Uuid
-  userId               String             @db.Uuid
-  content              String             @db.VarChar(5000)
+  policyNumber         String
+  policyStartDate      DateTime
+  policyEndDate        DateTime
+  Confirmation_64v     Boolean
+  NCB_Confirmation     Boolean
+  NCBType              NCBType
+  midYearTransfer      Boolean
+  midYearTransferDate  DateTime?
+  insuredDeclaredValue Float
+  voluntaryExcess      Float?
+  type                 policyType
+  policyCover          policyCoverOptions
+  breakIn              Boolean
+  claimHistory         Boolean
+  claimAmount          String?
+  nilDepreciationCover Boolean
+  depreciationCover    Boolean
+  consumablesCover     Boolean
+  additionalTowing     Boolean
+  tyreCover            Boolean
+  returnToInvoice      Boolean
+  vehicleId            String             @unique @db.Uuid
+  ownerId              String             @unique @db.Uuid
+  icId                 String             @db.Uuid
   createdAt            DateTime           @default(now())
   updatedAt            DateTime           @updatedAt
-  startupApplication   StartupApplication @relation(fields: [startupApplicationId], references: [id])
-  user                 User               @relation(fields: [userId], references: [id])
+  claims               Claim[]
+  ic                   IC                 @relation(fields: [icId], references: [id])
+  owner                Owner              @relation(fields: [ownerId], references: [id])
+  vehicle              Vehicle            @relation(fields: [vehicleId], references: [id])
+  
 
-  @@index([startupApplicationId])
-  @@index([userId])
+  @@schema("paramount")
 }
 
-model StartupMetric {
-  id                   String             @id @default(uuid()) @db.Uuid
-  startupApplicationId String             @db.Uuid
-  metricType           MetricType
-  value                Decimal            @db.Decimal(10, 2)
-  date                 DateTime
-  startupApplication   StartupApplication @relation(fields: [startupApplicationId], references: [id])
+model Owner {
+  id                String           @id @default(uuid()) @db.Uuid
+  name              String
+  address           String?
+  email             String?
+  contactNumber     String
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  insurancePolicies InsurancePolicy?
+  vehicle           Vehicle?
 
-  @@index([startupApplicationId])
+  @@schema("paramount")
 }
 
-model StartupCompetitor {
-  id                   String             @id @default(uuid()) @db.Uuid
-  startupApplicationId String             @db.Uuid
-  name                 String             @db.VarChar(255)
-  website              String?            @db.VarChar(2048)
-  description          String?            @db.VarChar(1000)
-  startupApplication   StartupApplication @relation(fields: [startupApplicationId], references: [id])
+model Vehicle {
+  id                      String           @id @default(uuid()) @db.Uuid
+  name                    String
+  vehicleNumber           String
+  vehicleRegistrationDate DateTime
+  ManufacturedYear        String
+  make                    String
+  model                   String
+  variant                 String
+  chassisNumber           String
+  chassisVerified         Boolean
+  engineNumber            String
+  engineVerified          Boolean
+  vehicleType             VehicleType
+  cubicCapacity           Int
+  color                   String?
+  bodyType                String?
+  vehicleClassType        vehicleClassType
+  seatingCapacity         Int
+  hypothecated            Boolean
+  hypothecatedWith        String?
+  RTOEndorsement          Boolean
+  OdometerReading         Int
+  fuelUsage               FuelTypes
+  taxPaid                 Int
+  ownerId                 String           @unique @db.Uuid
+  createdAt               DateTime         @default(now())
+  updatedAt               DateTime         @updatedAt
+  insurancePolicies       InsurancePolicy?
+  ownerDetails            Owner            @relation(fields: [ownerId], references: [id])
 
-  @@index([startupApplicationId])
+  @@schema("paramount")
 }
 
-model Mentorship {
-  id             String    @id @default(uuid()) @db.Uuid
-  mentorId       String    @db.Uuid
-  startupId      String    @db.Uuid
-  startDate      DateTime
-  endDate        DateTime?
-  focusAreas     String[]
-  meetingCadence String?   @db.VarChar(255)
-  notes          String?   @db.VarChar(5000)
-  mentor         User      @relation(fields: [mentorId], references: [id])
-  startup        Startup   @relation(fields: [startupId], references: [id])
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+model Driver {
+  id                String     @id @default(uuid()) @db.Uuid
+  vehicleParked     Boolean
+  relationWithOwner String?
+  name              String?
+  address           String?
+  contactNumber     String?
+  licenseNumber     String?
+  licenseType       String?
+  driverDOB         DateTime?
+  issueDate         DateTime?
+  expiryDate        DateTime?
+  MDLAuthority      String?
+  DLEndorsement     String?
+  drivingAllowed    Boolean
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  incidents         Incident[]
 
-  @@unique([mentorId, startupId])
-  @@index([mentorId])
-  @@index([startupId])
+  @@schema("paramount")
 }
 
-model Investment {
-  id               String         @id @default(uuid()) @db.Uuid
-  investorId       String         @db.Uuid
-  startupId        String         @db.Uuid
-  amount           Decimal        @db.Decimal(10, 2)
-  type             InvestmentType
-  date             DateTime
-  valuation        Decimal?       @db.Decimal(10, 2)
-  equityPercentage Decimal?       @db.Decimal(5, 2)
-  notes            String?        @db.VarChar(5000)
-  investor         User           @relation(fields: [investorId], references: [id])
-  startup          Startup        @relation(fields: [startupId], references: [id])
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
+model LossAndSurveyDetails {
+  id                     String   @id @default(uuid()) @db.Uuid
+  accidentDate           DateTime
+  intimationDate         DateTime @default(now())
+  surveyAllotmentDate    DateTime
+  surveyDate             DateTime
+  lossDescription        String
+  lossNature             String
+  observation            String?
+  thirdPartyLoss         Boolean
+  policeComplaintNo      String?
+  policeComplaintDetails String?
+  claimId                String   @unique @db.Uuid
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+  claim                  Claim    @relation(fields: [claimId], references: [id])
 
-  @@index([investorId])
-  @@index([startupId])
+  @@schema("paramount")
 }
 
-model Program {
-  id                  String               @id @default(uuid()) @db.Uuid
-  organizationId      String               @db.Uuid
-  name                String               @db.VarChar(255)
-  description         String               @db.VarChar(5000)
-  startDate           DateTime
-  endDate             DateTime
-  capacity            Int?
-  applicationDeadline DateTime?
-  programType         String               @db.VarChar(255)
-  organization        Organization         @relation(fields: [organizationId], references: [id])
-  startups            Startup[]
-  events              Event[]
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
-  StartupApplication  StartupApplication[]
-  status              ProgramStatus        @default(DRAFT)
+model Workshop {
+  id          String      @id @default(uuid()) @db.Uuid
+  name        String
+  address     String
+  contact     String
+  contactName String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  claims      Claim[]
+  workOrders  WorkOrder[]
 
-  @@index([organizationId])
+  @@schema("paramount")
 }
 
-model Event {
-  id          String    @id @default(uuid()) @db.Uuid
-  programId   String    @db.Uuid
-  name        String    @db.VarChar(255)
-  description String    @db.VarChar(5000)
-  date        DateTime
-  endDate     DateTime?
-  location    String    @db.VarChar(500)
-  virtualLink String?   @db.VarChar(2048)
-  capacity    Int?
-  eventType   String    @db.VarChar(255)
-  program     Program   @relation(fields: [programId], references: [id])
-  attendees   User[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+model Incident {
+  id          String   @id @default(uuid()) @db.Uuid
+  description String
+  driverId    String   @db.Uuid
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  claims      Claim[]
+  driver      Driver   @relation(fields: [driverId], references: [id])
 
-  @@index([programId])
+  @@schema("paramount")
 }
 
-model FounderProfile {
-  id               String   @id @default(uuid()) @db.Uuid
-  userId           String   @unique @db.Uuid
-  startupId        String   @db.Uuid
-  role             String   @db.VarChar(255)
-  equity           Decimal? @db.Decimal(5, 2)
-  previousStartups Int?
-  user             User     @relation(fields: [userId], references: [id])
-  startup          Startup  @relation(fields: [startupId], references: [id])
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+model Claim {
+  id                  String                @id @default(uuid()) @db.Uuid
+  claimNumber         String                @unique
+  internalClaimNumber String?               @unique
+  hubId               String?               @db.Uuid
+  incidentId          String?               @db.Uuid
+  workshopId          String?               @db.Uuid
+  organizationId      String                @db.Uuid
+  insurancePolicyId   String?               @db.Uuid
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  hub                 Hub?                  @relation(fields: [hubId], references: [id])
+  incident            Incident?             @relation(fields: [incidentId], references: [id])
+  insurancePolicy     InsurancePolicy?      @relation(fields: [insurancePolicyId], references: [id])
+  organization        Organization          @relation(fields: [organizationId], references: [id])
+  workshop            Workshop?             @relation(fields: [workshopId], references: [id])
+  claimStatus         ClaimStatus?
+  images              Image[]               @relation("ClaimImages")
+  lossDetails         LossAndSurveyDetails?
+  workOrder           WorkOrder?
+  users               User[]                @relation("ClaimToUser")
 
-  @@index([userId])
-  @@index([startupId])
+  @@schema("paramount")
 }
 
-model InvestorProfile {
-  id                   String   @id @default(uuid()) @db.Uuid
-  userId               String   @unique @db.Uuid
-  investmentPhilosophy String?  @db.VarChar(1000)
-  typicalCheckSize     String?  @db.VarChar(255)
-  investmentStages     String[]
-  sectorsOfInterest    String[]
-  geographicPreference String?  @db.VarChar(255)
-  portfolioSize        Int?
-  website              String?  @db.VarChar(2000)
-  user                 User     @relation(fields: [userId], references: [id])
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+model WorkOrder {
+  id         String    @id @default(uuid()) @db.Uuid
+  billId     String?   @db.Uuid
+  workshopId String?   @db.Uuid
+  claimId    String    @unique @db.Uuid
+  status     String
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  items      Item[]
+  bill       Bill?     @relation(fields: [billId], references: [id])
+  claim      Claim     @relation(fields: [claimId], references: [id])
+  workshop   Workshop? @relation(fields: [workshopId], references: [id])
 
-  @@index([userId])
+  @@index([billId])
+  @@index([workshopId])
+  @@index([claimId])
+  @@schema("paramount")
 }
 
-model MentorProfile {
-  id                     String    @id @default(uuid()) @db.Uuid
-  userId                 String    @unique @db.Uuid
-  areasOfExpertise       String[]
-  yearsOfExperience      Int?
-  currentPosition        String?   @db.VarChar(255)
-  company                String?   @db.VarChar(255)
-  mentoringSince         DateTime?
-  availableHours         Int?
-  preferredMeetingFormat String?   @db.VarChar(255)
-  website                String?   @db.VarChar(2000)
-  user                   User      @relation(fields: [userId], references: [id])
-  createdAt              DateTime  @default(now())
-  updatedAt              DateTime  @updatedAt
+model ClaimStatus {
+  id          String          @id @default(uuid()) @db.Uuid
+  status      claimStatusType
+  claimId     String          @unique @db.Uuid
+  updatedById String          @db.Uuid
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  claim       Claim           @relation(fields: [claimId], references: [id])
+  updatedBy   User            @relation("StatusUpdatedBy", fields: [updatedById], references: [id])
 
-  @@index([userId])
+  @@schema("paramount")
+}
+
+model Item {
+  id              String            @id @default(uuid()) @db.Uuid
+  description     String
+  repairOrReplace workOrderItemType
+  labourCharges   Float
+  paintCharges    Float
+  isAllowed       Boolean           @default(true)
+  workOrderId     String            @db.Uuid
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  workOrder       WorkOrder         @relation(fields: [workOrderId], references: [id])
+
+  @@index([workOrderId])
+  @@schema("paramount")
+}
+
+model BillToIC {
+  id             String       @id @default(uuid()) @db.Uuid
+  billId         String       @db.Uuid
+  organizationId String       @db.Uuid
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  bill           Bill         @relation(fields: [billId], references: [id])
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  @@schema("paramount")
+}
+
+model Bill {
+  id              String      @id @default(uuid()) @db.Uuid
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  billCareDetails BillItems[]
+  billToICs       BillToIC[]
+  workOrders      WorkOrder[]
+
+  @@schema("paramount")
+}
+
+model BillItems {
+  id        String   @id @default(uuid()) @db.Uuid
+  billId    String   @db.Uuid
+  details   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  bill      Bill     @relation(fields: [billId], references: [id])
+
+  @@index([billId])
+
+  @@schema("paramount")
+}
+
+model Image {
+  id        Int      @id @default(autoincrement())
+  url       String
+  fileName  String   @unique
+  mimeType  String
+  size      Int
+  claimId   String?  @db.Uuid
+  createdAt DateTime @default(now())
+  claim     Claim?   @relation("ClaimImages", fields: [claimId], references: [id])
+
+  @@schema("paramount")
+}
+
+enum claimStatusType {
+  CLAIM_INITIATED @map("claim_initiated")
+  CLAIM_APPROVED @map("claim_approved")
+  CLAIM_ASSESSED @map("claim_assessed")
+  CLAIM_REJECTED @map("claim_rejected")
+  IN_PROGRESS @map("in_progress")
+  SUBMITTED @map("submitted")
+
+  @@schema("paramount")
+}
+
+enum workOrderItemType {
+  REPAIR @map("repair")
+  REPLACE @map("replace")
+
+  @@schema("paramount")
+}
+
+enum relationshipType {
+  SELF @map("self")
+  SPOUSE @map("spouse")
+  FATHER @map("father")
+  MOTHER @map("mother")
+  BROTHER @map("brother")
+  SISTER @map("sister")
+  SON @map("son")
+  DAUGHTER @map("daughter")
+  OTHER @map("other")
+
+  @@schema("paramount")
+}
+
+enum policyCoverOptions {
+  COMPREHENSIVE @map("comprehensive")
+  THIRD_PARTY @map("third_party")
+  STAND_ALONE @map("stand_alone")
+  OWN_DAMAGE @map("own_damage")
+  INTERNAL_RISK @map("internal_risk")
+  ROAD_TRANSIT @map("road_transit")
+  ROAD_RISK @map("road_risk")
+  THIRD_PARTY_WITH_FIRE_AND_THEFT @map("third_party_with_fire_and_theft")
+
+  @@schema("paramount")
+}
+
+enum FuelTypes {
+  PETROL @map("petrol")
+  PETROL_CNG @map("petrol_cng")
+  DIESEL @map("diesel")
+  CNG @map("cng")
+  ELECTRIC @map("electric")
+
+  @@schema("paramount")
+}
+
+enum NCBType {
+  TWENTY @map("twenty")
+  TWENTY_FIVE @map("twenty_five")
+  THIRTY_FIVE @map("thirty_five")
+  FORTY_FIVE @map("forty_five")
+  FIFTY @map("fifty")
+
+  @@schema("paramount")
+}
+
+enum vehicleClassType {
+  TWO_WHEELER @map("two_wheeler")
+  FOUR_WHEELER @map("four_wheeler")
+
+  @@schema("paramount")
+}
+
+enum VehicleType {
+  TWO_WHEELER @map("two_wheeler")
+  PRIVATE @map("private")
+  COMMERCIAL @map("commercial")
+
+  @@schema("paramount")
+}
+
+enum policyType {
+  NEW @map("new")
+  RENEW @map("renew")
+  ROLLOVER @map("rollover")
+
+  @@schema("paramount")
+}
+
+enum EntityStatus {
+  ACTIVE @map("active")
+  INACTIVE @map("inactive")
+
+  @@schema("paramount")
+}
+
+enum Role {
+  INITIATOR       @map("initiator")
+  APPROVER        @map("approver")
+  ASSESSOR        @map("assessor")
+  IC_HOLDER       @map("ic_holder")
+  RO_HOLDER       @map("ro_holder")
+  HUB_HOLDER      @map("hub_holder")
+  ADMIN           @map("admin")
+  GENERIC_SUPPORT @map("generic_support")
+
+  @@schema("paramount")
+}
+
+enum ActionType {
+  CREATE @map("create")
+  UPDATE @map("update")
+  DELETE @map("delete")
+
+  @@schema("paramount")
+}
+
+enum ActorType {
+  SYSTEM @map("system")
+  MEMBER @map("member")
+  API    @map("api")
+
+  @@schema("paramount")
+}
+
+enum ContactRecord {
+  PERSON  @map("person")
+  COMPANY @map("company")
+
+  @@schema("paramount")
+}
+
+enum ContactStage {
+  LEAD           @map("lead")
+  QUALIFIED      @map("qualified")
+  OPPORTUNITY    @map("opportunity")
+  PROPOSAL       @map("proposal")
+  IN_NEGOTIATION @map("inNegotiation")
+  LOST           @map("lost")
+  WON            @map("won")
+
+  @@schema("paramount")
+}
+
+enum ContactTaskStatus {
+  OPEN      @map("open")
+  COMPLETED @map("completed")
+
+  @@schema("paramount")
+}
+
+enum DayOfWeek {
+  SUNDAY    @map("sunday")
+  MONDAY    @map("monday")
+  TUESDAY   @map("tuesday")
+  WEDNESDAY @map("wednesday")
+  THURSDAY  @map("thursday")
+  FRIDAY    @map("friday")
+  SATURDAY  @map("saturday")
+
+  @@schema("paramount")
+}
+
+enum FeedbackCategory {
+  SUGGESTION @map("suggestion")
+  PROBLEM    @map("problem")
+  QUESTION   @map("question")
+
+  @@schema("paramount")
+}
+
+enum InvitationStatus {
+  PENDING  @map("pending")
+  ACCEPTED @map("accepted")
+  REVOKED  @map("revoked")
+
+  @@schema("paramount")
+}
+
+enum WebhookTrigger {
+  CONTACT_CREATED @map("contactCreated")
+  CONTACT_UPDATED @map("contactUpdated")
+  CONTACT_DELETED @map("contactDeleted")
+
+  @@schema("paramount")
 }
